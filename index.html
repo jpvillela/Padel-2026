@@ -802,7 +802,7 @@ async function publish() {
   try {
     await Promise.race([p, new Promise((_, rj) => setTimeout(() => rj(new Error('timeout')), 12000))]);
     if (state.ts === snapTs) { dirty = false; if (org() && wantRes) dirtyR = false; pubState = 'ok'; lastPub = new Date(); try { localStorage.removeItem(LSKEY + '-dirty'); } catch (e) {} applyRemote(); return; } else { return publish(); }
-  } catch (e) { pubState = 'err'; pubErr = String((e && (e.code || e.message)) || ''); }
+  } catch (e) { pubState = 'err'; pubErr = String((e && (e.code || e.message)) || ''); try { console.error('publish', e); } catch (x) {} }
   render();
 }
 setInterval(() => { if (WEB && dirty && pubState !== 'pending') publish(); }, 8000);
@@ -1061,7 +1061,7 @@ function render() {
   const hhmm = d => d ? d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') : '';
   let syncChip;
   if (DEMO) syncChip = '<span class="chip warn">Modo demostración · no se publica</span>';
-  else if (WEB && edit()) syncChip = pubState === 'pending' ? '<span class="chip warn">Publicando…</span>' : (pubState === 'err' && /PERMISSION/i.test(pubErr) ? '<span class="chip bad">Sin permiso para publicar: avisa a la organización</span>' : (pubState === 'err' || !online ? '<button class="btn sm gold" data-act="pubnow">Sin conexión · Publicar ahora</button>' : `<span class="chip ok">Publicado${lastPub ? ' ' + hhmm(lastPub) : ''}</span>`));
+  else if (WEB && edit()) syncChip = pubState === 'pending' ? '<span class="chip warn">Publicando…</span>' : (pubState === 'err' && /PERMISSION/i.test(pubErr) ? '<span class="chip bad">Sin permiso para publicar: avisa a la organización</span>' : (pubState === 'err' || !online ? '<button class="btn sm gold" data-act="pubnow">Sin conexión · Publicar ahora</button>' + (online && pubErr ? '<span class="chip bad" style="margin-left:6px;max-width:340px;white-space:normal">Detalle: ' + esc(pubErr).slice(0, 120) + '</span>' : '') : `<span class="chip ok">Publicado${lastPub ? ' ' + hhmm(lastPub) : ''}</span>`));
   else if (PUBLIC || WEB) syncChip = `<span class="chip">${updatedAt ? 'Actualizado ' + updatedAt : 'Cargando…'}</span>`;
   else syncChip = syncMode === 'cloud' ? '<span class="chip ok">Guardado en la nube</span>' : '<span class="chip warn">Solo en este navegador</span>';
   const roleBox = !WEB ? '' : DEMO ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><a class="btn sm" href="?demo=${org() ? 'marcador' : 'org'}">Ver como ${org() ? 'marcador' : 'organización'}</a>` : (edit() ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><button class="btn sm" data-act="logout">Salir</button>` : (fb ? '<button class="btn sm ghost" data-act="login">Acceso organización</button>' : ''));

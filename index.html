@@ -1,0 +1,1285 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Copa Zona Centro 2026</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap"><style>
+/* Plan de diseño: torneo de pádel de empresa. Paleta FPY (azul, carbón) + dorado Carrán; titulares en condensada deportiva, cuerpo en grotesca humanista.
+   Layout: franja superior con logos y pestañas fijas, contenido en tarjetas sobre fondo frío; tablero de canchas como pieza central. */
+:root {
+  --bg: #F3F5F8; --surface: #FFFFFF; --surface2: #F8F9FB; --ink: #1B2331; --muted: #5C6678; --line: #DCE1E9;
+  --blue: #0F52A0; --blue-ink: #0F52A0; --blue-soft: #E4EDF8; --gold: #9A722E; --gold-fill: #C39A5B; --gold-soft: #F7EEDC;
+  --ok: #1B7F55; --ok-soft: #DFF2E8; --warn: #A66A00; --warn-soft: #FBEFD3; --bad: #B3321F; --bad-soft: #FADFDA;
+  --shadow: 0 1px 2px rgba(20,30,50,.06), 0 4px 14px rgba(20,30,50,.05);
+  --f-display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  --f-body: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D131B; --surface: #151D29; --surface2: #1A2331; --ink: #E7ECF3; --muted: #9AA7B9; --line: #263246;
+    --blue: #3D86DB; --blue-ink: #7DB2F0; --blue-soft: #15283F; --gold: #D6B070; --gold-fill: #C39A5B; --gold-soft: #2B2315;
+    --ok: #4DC08E; --ok-soft: #12301F; --warn: #E0A647; --warn-soft: #332612; --bad: #F08A78; --bad-soft: #3A1E19;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.25); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D131B; --surface: #151D29; --surface2: #1A2331; --ink: #E7ECF3; --muted: #9AA7B9; --line: #263246;
+  --blue: #3D86DB; --blue-ink: #7DB2F0; --blue-soft: #15283F; --gold: #D6B070; --gold-fill: #C39A5B; --gold-soft: #2B2315;
+  --ok: #4DC08E; --ok-soft: #12301F; --warn: #E0A647; --warn-soft: #332612; --bad: #F08A78; --bad-soft: #3A1E19;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.25); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--f-body); padding-inline: 16px; padding-block: 0 40px; margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing: .01em; margin: 0; text-wrap: balance; line-height: 1.1; }
+h2 { font-size: 28px; } h3 { font-size: 21px; } h4 { font-size: 16px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.wrap { max-width: 1240px; margin: 0 auto; }
+.num { font-family: var(--f-display); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); } .small { font-size: 13px; }
+.tn { font-variant-numeric: tabular-nums; }
+
+/* cabecera */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); padding-block: 10px 6px; margin-inline: -16px; padding-inline: 16px; border-bottom: 1px solid var(--line); }
+.top-in { max-width: 1240px; margin: 0 auto; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.plate { background: #fff; border-radius: 8px; padding: 4px 8px; display: flex; border: 1px solid var(--line); }
+.plate img { height: 34px; width: auto; display: block; }
+.title { font-family: var(--f-display); font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: .02em; text-transform: uppercase; }
+.title small { display: block; font-family: var(--f-body); font-size: 12px; font-weight: 500; letter-spacing: .04em; color: var(--muted); text-transform: none; margin-top: 3px; }
+.top-r { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.nav { max-width: 1240px; margin: 8px auto 0; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.nav button { white-space: nowrap; border: 1px solid var(--line); background: var(--surface); padding: 7px 14px; border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 14px; }
+.nav button[aria-current="page"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--blue-soft); color: var(--blue-ink); }
+.chip.ok { background: var(--ok-soft); color: var(--ok); } .chip.warn { background: var(--warn-soft); color: var(--warn); } .chip.bad { background: var(--bad-soft); color: var(--bad); } .chip.gold { background: var(--gold-soft); color: var(--gold); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.btn:hover { border-color: var(--blue); }
+.btn.pri { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn.gold { background: var(--gold-fill); border-color: var(--gold-fill); color: #1B1405; }
+.btn.sm { padding: 4px 10px; font-size: 13px; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+main { max-width: 1240px; margin: 18px auto 0; display: grid; gap: 18px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); min-width: 0; }
+.card > h3 + * { margin-top: 12px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.row.sp { justify-content: space-between; }
+.grid { display: grid; gap: 14px; }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.g4 { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 7px 14px; cursor: pointer; font-weight: 600; }
+.seg button[aria-pressed="true"] { background: var(--blue-soft); color: var(--blue-ink); }
+
+/* hero */
+.hero { background: linear-gradient(120deg, #0B3F7E 0%, #0F52A0 55%, #2467B3 100%); color: #fff; border-radius: 12px; padding: 22px; display: grid; gap: 16px; position: relative; overflow: hidden; }
+.hero::after { content: ''; position: absolute; right: -40px; top: -40px; width: 220px; height: 220px; border: 26px solid rgba(214,176,112,.9); border-radius: 50%; }
+.hero h2 { font-size: 40px; text-transform: uppercase; } .hero .sub { opacity: .9; max-width: 56ch; }
+.hero .dates { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
+.hero .d { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.3); padding: 8px 14px; border-radius: 10px; }
+.hero .d b { display: block; font-family: var(--f-display); font-size: 22px; letter-spacing: .02em; }
+.stat { display: grid; gap: 2px; }
+.stat .v { font-family: var(--f-display); font-size: 40px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat .l { color: var(--muted); font-size: 13px; }
+.bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; } .bar > i { display: block; height: 100%; background: var(--blue); }
+
+/* canchas */
+.courts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.court { border: 1px solid var(--line); border-radius: 10px; background: var(--surface2); padding: 10px 12px; display: grid; gap: 6px; min-height: 108px; }
+.court .cn { font-family: var(--f-display); font-weight: 700; color: var(--blue-ink); font-size: 14px; letter-spacing: .08em; text-transform: uppercase; display: flex; justify-content: space-between; }
+.court.live { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
+.court .vs { font-weight: 600; line-height: 1.25; }
+.court .vs span { display: block; }
+.court .vs .x { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+
+/* partidos */
+.block { display: grid; gap: 8px; }
+.block-h { display: flex; align-items: baseline; gap: 10px; border-bottom: 2px solid var(--blue); padding-bottom: 4px; margin-top: 8px; }
+.block-h .t { font-family: var(--f-display); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.match { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; display: grid; grid-template-columns: 44px 1fr; min-width: 0; overflow: hidden; }
+.match .cb { background: var(--blue-soft); color: var(--blue-ink); display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: 26px; border-right: 1px solid var(--line); }
+.match.F .cb { background: var(--gold-soft); color: var(--gold); }
+.match.live { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
+.match .mb { padding: 8px 10px; display: grid; gap: 4px; min-width: 0; }
+.match .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.side { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; min-width: 0; }
+.side .nm { overflow-wrap: anywhere; line-height: 1.2; font-weight: 600; }
+.side.win .nm { color: var(--ok); } .side.lose .nm { color: var(--muted); font-weight: 500; }
+.ref { color: var(--muted); font-style: italic; font-weight: 500; }
+.sc { width: 46px; text-align: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface2); padding: 5px 2px; font-family: var(--f-display); font-size: 20px; font-weight: 700; }
+.scv { font-family: var(--f-display); font-size: 24px; font-weight: 700; min-width: 28px; text-align: right; }
+.win-btns { display: flex; gap: 6px; font-size: 12px; align-items: center; color: var(--warn); flex-wrap: wrap; }
+
+/* tablas */
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 8px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; white-space: nowrap; }
+td.n, th.n { text-align: center; }
+tr.q td:first-child { box-shadow: inset 4px 0 0 var(--ok); }
+tr.q3 td:first-child { box-shadow: inset 4px 0 0 var(--gold-fill); }
+tr.out td { opacity: .5; text-decoration: line-through; }
+td input[type=text], td input[type=number], .fld { width: 100%; min-width: 90px; border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; background: var(--surface2); }
+.fld { padding: 8px 10px; }
+label.l { display: grid; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 600; }
+
+/* sorteo */
+.gcard { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.gcard header { background: var(--blue); color: #fff; font-family: var(--f-display); font-weight: 700; font-size: 20px; padding: 6px 12px; display: flex; justify-content: space-between; letter-spacing: .03em; text-transform: uppercase; }
+.gcard.F header { background: var(--gold-fill); color: #1B1405; }
+.gcard ol { margin: 0; padding: 6px 10px; list-style: none; display: grid; gap: 4px; min-height: 140px; align-content: start; }
+.gcard li { display: grid; grid-template-columns: 24px 1fr; gap: 6px; padding: 5px 4px; border-bottom: 1px dashed var(--line); font-weight: 600; }
+.gcard li .p { font-family: var(--f-display); color: var(--muted); font-size: 17px; }
+.gcard li.pop { animation: pop .5s ease-out; background: var(--gold-soft); }
+.star { color: var(--gold-fill); }
+@keyframes pop { from { transform: translateY(-8px) scale(1.03); opacity: 0; } to { transform: none; opacity: 1; } }
+.bk { border: 1px dashed var(--line); border-radius: 10px; padding: 10px; background: var(--surface2); }
+.bk h4 { margin-bottom: 6px; } .bk div { padding: 2px 0; }
+
+/* llaves */
+.bracket { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, 1fr); gap: 16px; overflow-x: auto; padding-bottom: 8px; align-items: center; }
+.col { display: grid; gap: 14px; align-content: center; }
+.col h4 { text-align: center; }
+.podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; }
+.pod { border-radius: 10px; padding: 14px; text-align: center; background: var(--surface2); border: 1px solid var(--line); display: grid; gap: 4px; }
+.pod .m { font-family: var(--f-display); font-size: 44px; font-weight: 700; line-height: 1; }
+.pod.p1 { background: var(--gold-soft); border-color: var(--gold-fill); padding-block: 26px; } .pod.p1 .m { color: var(--gold); font-size: 58px; }
+.pod .t { font-weight: 700; } .pod .pl { font-size: 13px; color: var(--muted); }
+.note { padding: 10px 12px; border-radius: 8px; background: var(--warn-soft); color: var(--warn); font-size: 14px; }
+.note.ok { background: var(--ok-soft); color: var(--ok); } .note.bad { background: var(--bad-soft); color: var(--bad); } .note.info { background: var(--blue-soft); color: var(--blue-ink); }
+.foot { max-width: 1240px; margin: 30px auto 0; display: grid; gap: 10px; justify-items: center; }
+.foot .plate { padding: 6px 14px; max-width: 100%; } .foot .plate img { height: auto; width: min(100%, 420px); }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 50; max-width: 90vw; }
+body.screen .adm { display: none !important; }
+body.screen { font-size: 17px; }
+@media (max-width: 560px) { .hero h2 { font-size: 32px; } .title { font-size: 21px; } .plate img { height: 28px; } }
+@media (prefers-reduced-motion: reduce) { .gcard li.pop { animation: none; } }
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:60;padding:16px}.modal{width:min(380px,100%);display:grid;gap:12px}.btn.ghost{background:transparent}</style></head><body><div id="app"></div><script src="config.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script>/* Motor del torneo — Copa zona centro. Funciona en node y en el navegador. */
+(function (root) {
+  const E = {};
+
+  /* ---------- utilidades ---------- */
+  E.hash = function (str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  };
+  E.rng = function (seedStr) {
+    let a = E.hash(String(seedStr)) || 1;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  };
+  E.shuffle = function (arr, rnd) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  };
+  E.toMin = s => { const [h, m] = String(s).split(':').map(Number); return h * 60 + (m || 0); };
+  E.fmt = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  E.norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  E.groupId = (cat, i) => (cat === 'F' ? 'M-' : '') + LET[i];
+  E.groupName = id => 'Grupo ' + id;
+
+  /* tamaños de grupo: máximo 4, lo más parejo posible (27 -> 6x4 + 1x3) */
+  E.groupSizes = function (n) {
+    if (n <= 0) return [];
+    if (n <= 4) return [n];
+    const G = Math.ceil(n / 4), base = Math.floor(n / G), rem = n % G;
+    return Array.from({ length: G }, (_, i) => base + (i < rem ? 1 : 0));
+  };
+
+  /* ---------- revisión de inscripciones ---------- */
+  E.validate = function (teams) {
+    teams = teams.filter(t => !t.out);
+    const out = [];
+    const seen = {};
+    teams.forEach(t => [t.p1, t.p2].forEach(p => {
+      const k = E.norm(p); if (!k) return;
+      (seen[k] = seen[k] || []).push(t);
+    }));
+    Object.entries(seen).forEach(([k, ts]) => {
+      const uniq = [...new Set(ts.map(t => t.id))];
+      if (uniq.length > 1) out.push({ level: 'error', msg: `Jugador repetido en ${uniq.length} parejas: ${ts[0].p1 && E.norm(ts[0].p1) === k ? ts[0].p1 : ts[0].p2} (${ts.map(t => t.name).join(' / ')})` });
+    });
+    const names = {};
+    teams.forEach(t => { const k = E.norm(t.name); (names[k] = names[k] || []).push(t); });
+    Object.values(names).forEach(ts => { if (ts.length > 1) out.push({ level: 'warn', msg: `Nombre de equipo repetido: ${ts[0].name}` }); });
+    ['M', 'F'].forEach(cat => {
+      const n = teams.filter(t => t.cat === cat).length;
+      const sizes = E.groupSizes(n);
+      const small = sizes.filter(s => s < 4).length;
+      if (n && small) out.push({ level: 'warn', msg: `${cat === 'M' ? 'Hombres' : 'Mujeres'}: ${n} parejas → grupos de ${sizes.join(', ')}. Los grupos de 3 juegan solo 2 partidos.` });
+      const seeds = teams.filter(t => t.cat === cat && t.seed).length;
+      if (n && seeds === 0) out.push({ level: 'info', msg: `${cat === 'M' ? 'Hombres' : 'Mujeres'}: aún sin cabezas de serie.` });
+      else if (n && seeds < sizes.length) out.push({ level: 'info', msg: `${cat === 'M' ? 'Hombres' : 'Mujeres'}: ${seeds} cabezas de serie para ${sizes.length} grupos.` });
+    });
+    return out;
+  };
+
+  /* ---------- sorteo jornada 1 ---------- */
+  /* teams de una categoría; seed = ranking 1..n (0/undefined = sin serie). Devuelve grupos y pasos del sorteo. */
+  E.drawGroups = function (teams, cat, opts) {
+    opts = opts || {};
+    const rnd = E.rng(opts.seed + '|J1|' + cat);
+    const sizes = E.groupSizes(teams.length);
+    const G = sizes.length;
+    const forbidden = (opts.forbidden || []).map(p => p.map(String));
+    const seeds = teams.filter(t => t.seed).sort((a, b) => a.seed - b.seed);
+    const rest = teams.filter(t => !t.seed);
+    let best = null;
+    for (let attempt = 0; attempt < 3000; attempt++) {
+      const groups = sizes.map(() => []);
+      const steps = [];
+      // cabezas de serie por oleadas: cada oleada cae en grupos distintos
+      for (let w = 0; w * G < seeds.length; w++) {
+        const wave = seeds.slice(w * G, (w + 1) * G);
+        const order = E.shuffle([...Array(G).keys()], rnd);
+        wave.forEach((t, i) => { const g = order[i]; groups[g].push(t.id); steps.push({ team: t.id, group: g, seed: true }); });
+      }
+      const slots = [];
+      groups.forEach((g, gi) => { for (let k = g.length; k < sizes[gi]; k++) slots.push(gi); });
+      const shuffledSlots = E.shuffle(slots, rnd);
+      E.shuffle(rest, rnd).forEach((t, i) => { const g = shuffledSlots[i]; groups[g].push(t.id); steps.push({ team: t.id, group: g, seed: false }); });
+      const bad = forbidden.some(([a, b]) => groups.some(g => g.includes(a) && g.includes(b)));
+      best = { groups, steps, attempts: attempt + 1 };
+      if (!bad) break;
+    }
+    return {
+      groups: best.groups.map((ids, i) => ({ id: E.groupId(cat, i), teams: ids })),
+      steps: best.steps, attempts: best.attempts
+    };
+  };
+
+  /* ---------- fixtures de grupo ---------- */
+  E.groupMatches = function (stage, cat, group, dur) {
+    const t = group.teams, id = group.id, out = [];
+    const rounds = t.length === 4 ? [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]]
+      : t.length === 3 ? [[[0, 1]], [[0, 2]], [[1, 2]]]
+      : t.length === 2 ? [[[0, 1]]] : [];
+    rounds.forEach((pairs, r) => pairs.forEach((p, k) => out.push({
+      id: `${stage}-${id}-${r + 1}${k + 1}`, stage, cat, phase: 'grupos', group: id, round: r + 1,
+      a: t[p[0]], b: t[p[1]], pa: p[0] + 1, pb: p[1] + 1, dur
+    })));
+    return out;
+  };
+
+  /* ---------- programación en canchas ---------- */
+  /* asigna slot (bloque de `dur` minutos) y cancha. Minimiza descansos nulos. */
+  E.schedule = function (matches, o) {
+    const nC = o.nCourts || 6, iters = o.iters || 400;
+    const rnd = E.rng((o.seed || 'x') + '|sched');
+    let best = null;
+    for (let it = 0; it < iters; it++) {
+      const rem = matches.slice(), last = {}, res = [];
+      let slot = 0, b2b = 0, guard = 0;
+      while (rem.length && guard++ < 500) {
+        const cands = E.shuffle(rem, rnd).map(m => ({
+          m,
+          pen: ((last[m.a] === slot - 1) ? 1 : 0) + ((last[m.b] === slot - 1) ? 1 : 0)
+        }));
+        cands.sort((x, y) => (x.pen - y.pen) || (x.m.round - y.m.round));
+        const used = new Set(), pick = [];
+        for (const c of cands) {
+          if (pick.length >= nC) break;
+          if (used.has(c.m.a) || used.has(c.m.b)) continue;
+          if (c.pen && it % 2 === 1 && rnd() < 0.35) continue;
+          pick.push(c); used.add(c.m.a); used.add(c.m.b);
+        }
+        pick.sort((x, y) => (x.m.cat + x.m.group).localeCompare(y.m.cat + y.m.group) || x.m.round - y.m.round);
+        pick.forEach((c, k) => {
+          res.push({ id: c.m.id, slot, court: k + 1 });
+          b2b += c.pen; last[c.m.a] = slot; last[c.m.b] = slot;
+          rem.splice(rem.indexOf(c.m), 1);
+        });
+        slot++;
+      }
+      const cost = slot * 1000 + b2b * 10;
+      if (!best || cost < best.cost) best = { cost, slots: slot, b2b, res };
+    }
+    return best;
+  };
+
+  /* ---------- resultados y posiciones ---------- */
+  E.winner = function (m, r) {
+    if (!r || r.ga === '' || r.gb === '' || r.ga == null || r.gb == null) return null;
+    const a = +r.ga, b = +r.gb;
+    if (a > b) return m.a; if (b > a) return m.b;
+    return r.w === 'a' ? m.a : r.w === 'b' ? m.b : null;
+  };
+  E.gamesOf = function (r) { // games efectivos (un empate resuelto por tie-break suma 1 al ganador)
+    let a = +r.ga, b = +r.gb;
+    if (a === b) { if (r.w === 'a') a++; else if (r.w === 'b') b++; }
+    return [a, b];
+  };
+  E.standings = function (teamIds, matches, results, tb) {
+    const rows = {};
+    teamIds.forEach(id => rows[id] = { id, pj: 0, pg: 0, pp: 0, jf: 0, jc: 0, dif: 0, tb: (tb && tb[id]) || 0 });
+    let done = 0;
+    matches.forEach(m => {
+      const w = E.winner(m, results[m.id]); if (!w) return;
+      done++;
+      const [ga, gb] = E.gamesOf(results[m.id]);
+      const A = rows[m.a], B = rows[m.b];
+      A.pj++; B.pj++; A.jf += ga; A.jc += gb; B.jf += gb; B.jc += ga;
+      if (w === m.a) { A.pg++; B.pp++; } else { B.pg++; A.pp++; }
+    });
+    const list = Object.values(rows);
+    list.forEach(r => r.dif = r.jf - r.jc);
+    list.sort((x, y) => (y.pg - x.pg) || (y.dif - x.dif) || (y.tb - x.tb));
+    list.forEach((r, i) => {
+      r.pos = i + 1;
+      r.tied = list.some((o, j) => j !== i && o.pg === r.pg && o.dif === r.dif && o.tb === r.tb && (done > 0));
+    });
+    return { rows: list, done, total: matches.length, complete: done === matches.length };
+  };
+
+  /* ranking entre grupos (puede haber grupos de distinto tamaño → se usan promedios) */
+  E.rankAcross = function (groupStandings, seed) {
+    const all = [];
+    groupStandings.forEach(gs => gs.rows.forEach(r => all.push(Object.assign({ group: gs.group }, r))));
+    all.forEach(r => {
+      r.ratio = r.pj ? r.pg / r.pj : 0;
+      r.difAvg = r.pj ? r.dif / r.pj : 0;
+      r.rk = E.hash(seed + '|rk|' + r.id);
+    });
+    all.sort((x, y) => (y.ratio - x.ratio) || (y.difAvg - x.difAvg) || (y.tb - x.tb) || (x.rk - y.rk));
+    all.forEach((r, i) => {
+      r.rank = i + 1;
+      r.tiedRank = all.some((o, j) => j !== i && o.ratio === r.ratio && o.difAvg === r.difAvg && o.tb === r.tb);
+    });
+    return all;
+  };
+
+  /* clasificados: 1°s y 2°s de cada grupo; si faltan, mejores 3°s (y 4°s) */
+  E.qualifiers = function (ranked, Q) {
+    const take = [];
+    for (let pos = 1; pos <= 4 && take.length < Q; pos++) {
+      const lvl = ranked.filter(r => r.pos === pos);
+      const need = Q - take.length;
+      if (pos <= 2) lvl.forEach(r => take.push(r));
+      else lvl.slice(0, need).forEach(r => take.push(r));
+    }
+    take.sort((x, y) => x.rank - y.rank);
+    return take.slice(0, Q);
+  };
+
+  /* ---------- jornada 2: bolilleros ---------- */
+  E.drawJ2 = function (qualified, cat, nGroups, o) {
+    const rnd = E.rng(o.seed + '|J2|' + cat);
+    const ids = qualified.map(q => q.id);
+    const origin = {}; qualified.forEach(q => origin[q.id] = q.group);
+    const size = nGroups;
+    const buckets = []; for (let i = 0; i < ids.length; i += size) buckets.push(ids.slice(i, i + size));
+    let best = null, tries = 0;
+    for (; tries < 5000; tries++) {
+      const groups = Array.from({ length: nGroups }, () => []);
+      const steps = [];
+      buckets.forEach((b, bi) => {
+        const order = E.shuffle([...Array(nGroups).keys()], rnd);
+        E.shuffle(b, rnd).forEach((id, k) => { const g = order[k % nGroups]; groups[g].push(id); steps.push({ team: id, group: g, bucket: bi + 1 }); });
+      });
+      const clash = groups.some(g => g.some((a, i) => g.some((b, j) => j > i && origin[a] === origin[b])));
+      best = { groups, steps, clash };
+      if (!o.avoidRematch || !clash) break;
+    }
+    return {
+      groups: best.groups.map((tids, i) => ({ id: E.groupId(cat, i), teams: tids })),
+      steps: best.steps, buckets, attempts: tries + 1, rematch: best.clash
+    };
+  };
+
+  /* ---------- llaves ---------- */
+  const pos = (cat, g, p) => ({ t: 'pos', cat, group: g, pos: p });
+  const W = m => ({ t: 'w', m }), L = m => ({ t: 'l', m });
+  E.koDefs = function (cat) {
+    if (cat === 'M') return [
+      { id: 'QF1', name: 'Cuartos 1', round: 'Cuartos de final', a: pos('M', 'A', 1), b: pos('M', 'B', 2) },
+      { id: 'QF2', name: 'Cuartos 2', round: 'Cuartos de final', a: pos('M', 'A', 2), b: pos('M', 'B', 1) },
+      { id: 'QF3', name: 'Cuartos 3', round: 'Cuartos de final', a: pos('M', 'C', 1), b: pos('M', 'D', 2) },
+      { id: 'QF4', name: 'Cuartos 4', round: 'Cuartos de final', a: pos('M', 'C', 2), b: pos('M', 'D', 1) },
+      { id: 'SF1', name: 'Semifinal 1', round: 'Semifinal', a: W('QF1'), b: W('QF3') },
+      { id: 'SF2', name: 'Semifinal 2', round: 'Semifinal', a: W('QF2'), b: W('QF4') },
+      { id: 'F', name: 'Final', round: 'Final', a: W('SF1'), b: W('SF2') },
+      { id: 'T', name: '3er y 4to lugar', round: '3er lugar', a: L('SF1'), b: L('SF2') }
+    ];
+    return [
+      { id: 'SF1', name: 'Semifinal 1', round: 'Semifinal', a: pos('F', 'M-A', 1), b: pos('F', 'M-B', 2) },
+      { id: 'SF2', name: 'Semifinal 2', round: 'Semifinal', a: pos('F', 'M-A', 2), b: pos('F', 'M-B', 1) },
+      { id: 'F', name: 'Final', round: 'Final', a: W('SF1'), b: W('SF2') },
+      { id: 'T', name: '3er y 4to lugar', round: '3er lugar', a: L('SF1'), b: L('SF2') }
+    ];
+  };
+
+  /* ---------- cupos a la gran final (mayor resto) ---------- */
+  E.cupos = function (counts, total) {
+    const zones = Object.keys(counts), sum = zones.reduce((s, z) => s + counts[z], 0);
+    if (!sum) return {};
+    const raw = zones.map(z => ({ z, q: counts[z] * total / sum }));
+    const out = {}; let left = total;
+    raw.forEach(r => { out[r.z] = Math.floor(r.q); left -= out[r.z]; });
+    raw.sort((a, b) => ((b.q - Math.floor(b.q)) - (a.q - Math.floor(a.q))) || (counts[b.z] - counts[a.z]));
+    for (let i = 0; left > 0; i++, left--) out[raw[i % raw.length].z]++;
+    return out;
+  };
+
+
+  /* ================= estado del torneo ================= */
+  E.defaults = function () {
+    return {
+      seed: '', nCourts: 6, start: '19:00', d1: '2026-10-15', d2: '2026-10-29',
+      dur1: 20, dur2: 20, durKO: 40, qM: 16, qF: 8, nG2M: 4, nG2F: 2,
+      cuposM: 4, cuposF: 3, avoidRematch: false, forbidden: []
+    };
+  };
+  E.newState = function (teams) {
+    return { v: 1, settings: E.defaults(), teams: teams || [], j1: null, j2: null, results: {}, tb: {}, log: [] };
+  };
+  E.teamMap = st => Object.fromEntries(st.teams.map(t => [t.id, t]));
+  E.catName = c => c === 'M' ? 'Hombres' : 'Mujeres';
+
+  /* jornada 1: sorteo + fixtures + horarios */
+  E.makeJ1 = function (st, seedStr) {
+    const S = st.settings; S.seed = seedStr || S.seed || ('copa-' + Date.now());
+    const groups = { M: [], F: [] }, steps = { M: [], F: [] }, matches = [], attempts = {};
+    ['M', 'F'].forEach(cat => {
+      const ts = st.teams.filter(t => t.cat === cat && !t.out);
+      if (!ts.length) return;
+      const forb = (S.forbidden || []).filter(p => ts.some(t => t.id === p[0]) && ts.some(t => t.id === p[1]));
+      const d = E.drawGroups(ts, cat, { seed: S.seed, forbidden: forb });
+      groups[cat] = d.groups; steps[cat] = d.steps; attempts[cat] = d.attempts;
+      d.groups.forEach(g => matches.push(...E.groupMatches('J1', cat, g, S.dur1)));
+    });
+    const sch = E.schedule(matches, { nCourts: S.nCourts, seed: S.seed, iters: 500 });
+    const t0 = E.toMin(S.start), pos = Object.fromEntries(sch.res.map(r => [r.id, r]));
+    matches.forEach(m => { const r = pos[m.id]; m.slot = r.slot; m.court = r.court; m.startMin = t0 + r.slot * S.dur1; m.endMin = m.startMin + S.dur1; });
+    matches.sort((a, b) => a.startMin - b.startMin || a.court - b.court);
+    st.j1 = { groups, steps, matches, attempts, slots: sch.slots, endMin: t0 + sch.slots * S.dur1, drawnAt: new Date().toISOString() };
+    st.j2 = null; st.results = {}; st.tb = {};
+    return st;
+  };
+
+  /* referencias de llaves */
+  E.refText = function (r) {
+    if (!r) return '—';
+    if (r.t === 'pos') return `${r.pos}° ${E.groupName(r.group)}`;
+    return (r.t === 'w' ? 'Ganador ' : 'Perdedor ') + r.m;
+  };
+  E.j2Group = (st, cat, gid) => st.j2 && st.j2.groups[cat].find(g => g.id === gid);
+  E.stand2 = function (st, cat, gid) {
+    const g = E.j2Group(st, cat, gid); if (!g) return null;
+    const ms = st.j2.matches.filter(m => m.cat === cat && m.phase === 'grupos' && m.group === gid);
+    return E.standings(g.teams, ms, st.results, st.tb);
+  };
+  E.resolve = function (st, ref, cat) {
+    if (!ref) return null;
+    if (typeof ref === 'string') return ref;
+    if (ref.t === 'pos') {
+      const sd = E.stand2(st, ref.cat, ref.group);
+      if (!sd || !sd.complete) return null;
+      const row = sd.rows[ref.pos - 1];
+      return row && !row.tied ? row.id : null;
+    }
+    const m = st.j2 && st.j2.matches.find(x => x.cat === cat && x.koId === ref.m);
+    if (!m) return null;
+    const v = E.view(st, m), w = E.winner(v, st.results[m.id]);
+    if (!w) return null;
+    return ref.t === 'w' ? w : (w === v.a ? v.b : v.a);
+  };
+  E.view = function (st, m) {
+    if (m.phase !== 'ko') return m;
+    return Object.assign({}, m, { a: E.resolve(st, m.ra, m.cat), b: E.resolve(st, m.rb, m.cat) });
+  };
+
+  /* standings jornada 1 por categoría */
+  E.j1Standings = function (st) {
+    const out = { M: [], F: [] };
+    if (!st.j1) return out;
+    ['M', 'F'].forEach(cat => st.j1.groups[cat].forEach(g => {
+      const ms = st.j1.matches.filter(m => m.cat === cat && m.group === g.id);
+      out[cat].push(Object.assign(E.standings(g.teams, ms, st.results, st.tb), { group: g.id }));
+    }));
+    return out;
+  };
+  E.j1Complete = st => !!st.j1 && st.j1.matches.every(m => E.winner(m, st.results[m.id]));
+  E.j1Ranking = function (st) {
+    const gs = E.j1Standings(st), out = {};
+    ['M', 'F'].forEach(cat => {
+      const ranked = E.rankAcross(gs[cat], st.settings.seed);
+      const Q = cat === 'M' ? st.settings.qM : st.settings.qF;
+      const q = E.qualifiers(ranked, Math.min(Q, ranked.length));
+      const qs = new Set(q.map(r => r.id));
+      out[cat] = { ranked, qualified: q, qset: qs, Q };
+    });
+    return out;
+  };
+
+  /* jornada 2: bolilleros + grupos + llaves + horarios */
+  E.makeJ2 = function (st) {
+    const S = st.settings, rk = E.j1Ranking(st);
+    const groups = { M: [], F: [] }, steps = { M: [], F: [] }, info = {}, matches = [];
+    [['M', S.nG2M], ['F', S.nG2F]].forEach(([cat, nG]) => {
+      const q = rk[cat].qualified; if (!q.length) return;
+      const d = E.drawJ2(q, cat, nG, { seed: S.seed, avoidRematch: S.avoidRematch });
+      groups[cat] = d.groups; steps[cat] = d.steps; info[cat] = { buckets: d.buckets, rematch: d.rematch, attempts: d.attempts, origin: Object.fromEntries(q.map(r => [r.id, r.group])) };
+      d.groups.forEach(g => matches.push(...E.groupMatches('J2', cat, g, S.dur2)));
+    });
+    const sch = E.schedule(matches, { nCourts: S.nCourts, seed: S.seed + '|2', iters: 500 });
+    const t0 = E.toMin(S.start), pos = Object.fromEntries(sch.res.map(r => [r.id, r]));
+    matches.forEach(m => { const r = pos[m.id]; m.slot = r.slot; m.court = r.court; m.startMin = t0 + r.slot * S.dur2; m.endMin = m.startMin + S.dur2; });
+    const groupsEnd = t0 + sch.slots * S.dur2;
+    // llaves por bloques
+    const ko = {};
+    ['M', 'F'].forEach(cat => { if (groups[cat].length) E.koDefs(cat).forEach(d => { ko[cat + d.id] = Object.assign({ cat }, d); }); });
+    const blocks = [['MQF1', 'MQF2', 'MQF3', 'MQF4', 'FSF1', 'FSF2'], ['MSF1', 'MSF2', 'FF', 'FT'], ['MF', 'MT']];
+    let t = groupsEnd;
+    blocks.forEach(b => {
+      const items = b.filter(k => ko[k]);
+      items.forEach((k, i) => {
+        const d = ko[k];
+        matches.push({ id: `J2-${d.cat}-${d.id}`, stage: 'J2', cat: d.cat, phase: 'ko', koId: d.id, name: d.name, round: d.round, ra: d.a, rb: d.b, court: i + 1, startMin: t, endMin: t + S.durKO, dur: S.durKO });
+      });
+      if (items.length) t += S.durKO;
+    });
+    matches.sort((a, b) => a.startMin - b.startMin || a.court - b.court);
+    st.j2 = { groups, steps, info, matches, groupsEnd, endMin: t, drawnAt: new Date().toISOString() };
+    return st;
+  };
+
+  /* podio y clasificados a la gran final */
+  E.podium = function (st, cat) {
+    if (!st.j2) return [];
+    const get = (id) => { const m = st.j2.matches.find(x => x.cat === cat && x.koId === id); if (!m) return null; const v = E.view(st, m), w = E.winner(v, st.results[m.id]); return w ? { w, l: w === v.a ? v.b : v.a } : null; };
+    const f = get('F'), t = get('T'), out = [];
+    if (f) { out.push(f.w, f.l); }
+    if (t) { out.push(t.w); if (cat === 'M') out.push(t.l); }
+    return out;
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.Engine = E;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script><script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script><script>/* Generador de Excel para canchas y parejas. Funciona en node y navegador (ExcelJS inyectado). */
+(function (root) {
+  const E = root.Engine || (typeof require !== 'undefined' ? require('./engine.js') : null);
+  const X = {};
+  const C = { blue: 'FF0F52A0', gray: 'FF4D4D4F', gold: 'FFC39A5B', lblue: 'FFE3ECF7', lgold: 'FFF6ECDA', line: 'FFBDBDBD', white: 'FFFFFFFF', light: 'FFF3F3F3' };
+  const thin = { style: 'thin', color: { argb: C.line } };
+  const box = { top: thin, left: thin, bottom: thin, right: thin };
+  const fill = argb => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
+
+  const dateLabel = iso => {
+    const d = new Date(iso + 'T12:00:00');
+    const s = d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
+  X.dateLabel = dateLabel;
+
+  const RULES = {
+    grupos: dur => [
+      `Partidos a un set o ${dur} minutos.`,
+      `Empate en los ${dur} minutos: tie break.`,
+      `Se debe terminar el juego iniciado a los ${dur} minutos. Si hay diferencia de un game, el equipo que ha sacado menos veces puede sacar para empatar y luego tie break.`,
+      'Desempate en la tabla: partidos ganados, diferencia de juegos y, si persiste, super tie break.'
+    ],
+    ko: dur => [`Cuartos de final, semifinales, final y 3er lugar: partidos de ${dur} minutos (reglas de sets por confirmar con la organización).`]
+  };
+
+  function ctx(st, stage) {
+    const S = st.settings, tm = E.teamMap(st);
+    const stg = stage === 'J2' ? st.j2 : st.j1;
+    const date = stage === 'J2' ? S.d2 : S.d1;
+    const mk = m => E.view(st, m);
+    const tname = (id, m, side) => {
+      if (id) { const t = tm[id]; return (t.seed && stage === 'J1' ? '★ ' : '') + t.name; }
+      return E.refText(side === 'a' ? m.ra : m.rb);
+    };
+    const gen = (m, side) => {
+      if (m.phase === 'ko') return E.refText(side === 'a' ? m.ra : m.rb);
+      return `${m.group.replace('M-', '')}${side === 'a' ? m.pa : m.pb}`.replace(/^/, m.cat === 'F' ? 'M-' : '');
+    };
+    const label = m => {
+      if (m.phase === 'ko') return `${m.round}${m.koId.match(/\d/) ? ' ' + m.koId.slice(-1) : ''}`;
+      return E.groupName(m.group);
+    };
+    return { S, tm, stg, date, mk, tname, gen, label, stage };
+  }
+
+  function titleBlock(ws, text, sub, cols) {
+    ws.mergeCells(1, 1, 1, cols); ws.mergeCells(2, 1, 2, cols);
+    const a = ws.getCell(1, 1); a.value = text; a.font = { bold: true, size: 16, color: { argb: C.white } }; a.fill = fill(C.blue); a.alignment = { vertical: 'middle', indent: 1 };
+    const b = ws.getCell(2, 1); b.value = sub; b.font = { size: 10, color: { argb: C.white } }; b.fill = fill(C.gray); b.alignment = { vertical: 'middle', indent: 1 };
+    ws.getRow(1).height = 30; ws.getRow(2).height = 18;
+  }
+  function head(row, color) {
+    row.eachCell(c => { c.font = { bold: true, color: { argb: C.white } }; c.fill = fill(color || C.gray); c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.border = box; });
+    row.height = 22;
+  }
+  function setup(ws, landscape) { ws.pageSetup = { orientation: landscape ? 'landscape' : 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: .4, right: .4, top: .5, bottom: .5, header: .2, footer: .2 } }; }
+
+  /* ---- grilla horaria: filas = bloques horarios, columnas = canchas ---- */
+  function gridSheet(wb, k, name, generic) {
+    const { S, stg, date } = k;
+    const ws = wb.addWorksheet(name, { views: [{ state: 'frozen', ySplit: 3, xSplit: 1 }] });
+    const nC = S.nCourts, cols = nC + 1;
+    titleBlock(ws, `Copa zona centro 2026 · Jornada ${k.stage === 'J2' ? 2 : 1} · ${generic ? 'programación genérica' : 'programación'}`, `${dateLabel(date)} · inicio ${S.start} h · ${nC} canchas`, cols);
+    const h = ws.getRow(3); h.getCell(1).value = 'Horario'; for (let c = 1; c <= nC; c++) h.getCell(c + 1).value = 'Cancha ' + c; head(h, C.blue);
+    ws.getColumn(1).width = 14; for (let c = 2; c <= cols; c++) ws.getColumn(c).width = 30;
+    const blocks = [...new Set(stg.matches.map(m => m.startMin + '-' + m.endMin))].sort((a, b) => parseInt(a) - parseInt(b));
+    let r = 4;
+    blocks.forEach(b => {
+      const [s, e] = b.split('-').map(Number);
+      const row = ws.getRow(r++); row.height = 44;
+      const c0 = row.getCell(1); c0.value = `${E.fmt(s)} - ${E.fmt(e)}`; c0.font = { bold: true }; c0.alignment = { horizontal: 'center', vertical: 'middle' }; c0.border = box; c0.fill = fill(C.light);
+      for (let c = 1; c <= nC; c++) { const cell = row.getCell(c + 1); cell.border = box; cell.fill = fill('FFFFFFFF'); }
+      stg.matches.filter(m => m.startMin === s && m.endMin === e).forEach(m => {
+        const v = k.mk(m);
+        const a = generic ? k.gen(m, 'a') : k.tname(v.a, m, 'a'), bb = generic ? k.gen(m, 'b') : k.tname(v.b, m, 'b');
+        const cell = row.getCell(m.court + 1);
+        cell.value = `${m.cat === 'F' ? '[M] ' : '[H] '}${k.label(m)}\n${a}  vs  ${bb}`;
+        cell.alignment = { wrapText: true, vertical: 'middle', horizontal: 'center' };
+        cell.fill = fill(m.cat === 'F' ? C.lgold : C.lblue);
+        if (m.phase === 'ko') cell.font = { bold: true };
+      });
+    });
+    r += 1;
+    const rules = k.stage === 'J2' ? RULES.grupos(S.dur2).concat(RULES.ko(S.durKO)) : RULES.grupos(S.dur1);
+    ws.getCell(r, 1).value = 'REGLAS'; ws.getCell(r, 1).font = { bold: true };
+    rules.forEach((t, i) => { ws.mergeCells(r + 1 + i, 1, r + 1 + i, cols); const c = ws.getCell(r + 1 + i, 1); c.value = '• ' + t; c.alignment = { wrapText: true, vertical: 'top' }; ws.getRow(r + 1 + i).height = t.length > 110 ? 32 : 18; });
+    ws.getCell(r + rules.length + 2, 1).value = '[H] hombres · [M] mujeres · ★ cabeza de serie'; ws.getCell(r + rules.length + 2, 1).font = { italic: true, size: 9 };
+    setup(ws, true);
+  }
+
+  /* ---- una hoja por cancha, lista para imprimir ---- */
+  function courtSheets(wb, k) {
+    const { S, stg } = k;
+    for (let c = 1; c <= S.nCourts; c++) {
+      const ws = wb.addWorksheet('Cancha ' + c);
+      titleBlock(ws, `Cancha ${c} · Jornada ${k.stage === 'J2' ? 2 : 1}`, `${dateLabel(k.date)} · Copa zona centro 2026`, 8);
+      const h = ws.getRow(3);
+      ['Hora', 'Rama', 'Fase', 'Pareja A', 'Pareja B', 'Games A', 'Games B', 'Observación'].forEach((t, i) => h.getCell(i + 1).value = t); head(h, C.blue);
+      [12, 9, 16, 34, 34, 10, 10, 22].forEach((w, i) => ws.getColumn(i + 1).width = w);
+      let r = 4;
+      stg.matches.filter(m => m.court === c).forEach(m => {
+        const v = k.mk(m), row = ws.getRow(r++); row.height = 30;
+        const vals = [`${E.fmt(m.startMin)}-${E.fmt(m.endMin)}`, m.cat === 'F' ? 'Mujeres' : 'Hombres', k.label(m), k.tname(v.a, m, 'a'), k.tname(v.b, m, 'b'), '', '', ''];
+        vals.forEach((x, i) => { const cell = row.getCell(i + 1); cell.value = x; cell.border = box; cell.alignment = { vertical: 'middle', wrapText: true, horizontal: i >= 5 ? 'center' : 'left' }; });
+        row.getCell(1).font = { bold: true }; row.getCell(2).fill = fill(m.cat === 'F' ? C.lgold : C.lblue);
+      });
+      setup(ws, true);
+    }
+  }
+
+  /* ---- por pareja (para enviar por correo) ---- */
+  function pairSheet(wb, k) {
+    const { stg } = k;
+    const ws = wb.addWorksheet('Por pareja', { views: [{ state: 'frozen', ySplit: 3 }] });
+    titleBlock(ws, `Programación por pareja · Jornada ${k.stage === 'J2' ? 2 : 1}`, `${dateLabel(k.date)} · inicio ${k.S.start} h`, 7);
+    const h = ws.getRow(3); ['Rama', 'Grupo', 'Pareja', 'Jugadores', 'Partido 1', 'Partido 2', 'Partido 3'].forEach((t, i) => h.getCell(i + 1).value = t); head(h, C.blue);
+    [10, 11, 28, 38, 40, 40, 40].forEach((w, i) => ws.getColumn(i + 1).width = w);
+    let r = 4;
+    ['M', 'F'].forEach(cat => (stg.groups[cat] || []).forEach(g => g.teams.forEach(id => {
+      const t = k.tm[id], row = ws.getRow(r++); row.height = 34;
+      const ms = stg.matches.filter(m => m.phase === 'grupos' && m.cat === cat && (m.a === id || m.b === id)).sort((a, b) => a.startMin - b.startMin);
+      const vals = [cat === 'F' ? 'Mujeres' : 'Hombres', E.groupName(g.id), (t.seed && k.stage === 'J1' ? '★ ' : '') + t.name, `${t.p1} / ${t.p2}`]
+        .concat(ms.map(m => { const rival = k.tm[m.a === id ? m.b : m.a]; return `${E.fmt(m.startMin)} · Cancha ${m.court}\nvs ${rival.name}`; }));
+      vals.forEach((x, i) => { const c = row.getCell(i + 1); c.value = x; c.border = box; c.alignment = { wrapText: true, vertical: 'middle' }; });
+      row.getCell(1).fill = fill(cat === 'F' ? C.lgold : C.lblue);
+    })));
+    setup(ws, true);
+  }
+
+  /* ---- sorteo ---- */
+  function drawSheet(wb, k) {
+    const { stg } = k;
+    const ws = wb.addWorksheet('Sorteo');
+    titleBlock(ws, `Resultado del sorteo · Jornada ${k.stage === 'J2' ? 2 : 1}`, `Semilla del sorteo: ${k.S.seed}  ·  ★ cabeza de serie`, 8);
+    let col = 1;
+    ['M', 'F'].forEach(cat => {
+      const gs = stg.groups[cat] || []; if (!gs.length) return;
+      ws.getCell(3, col).value = cat === 'F' ? 'MUJERES' : 'HOMBRES'; ws.getCell(3, col).font = { bold: true, color: { argb: C.blue }, size: 12 };
+      let r = 4;
+      gs.forEach(g => {
+        const hc = ws.getCell(r, col); hc.value = E.groupName(g.id); hc.font = { bold: true, color: { argb: C.white } }; hc.fill = fill(cat === 'F' ? C.gold : C.blue); hc.border = box;
+        g.teams.forEach((id, i) => { const t = k.tm[id]; const c = ws.getCell(r + 1 + i, col); c.value = `${i + 1}. ${(t.seed && k.stage === 'J1') ? '★ ' : ''}${t.name}`; c.border = box; });
+        r += g.teams.length + 2;
+      });
+      ws.getColumn(col).width = 36; ws.getColumn(col + 1).width = 4; col += 2;
+    });
+    setup(ws, false);
+  }
+
+  function entrantsSheet(wb, k, st) {
+    const ws = wb.addWorksheet('Inscritos');
+    titleBlock(ws, 'Parejas participantes · zona centro', `${st.teams.filter(t => !t.out && t.cat === 'M').length} parejas de hombres · ${st.teams.filter(t => !t.out && t.cat === 'F').length} parejas de mujeres`, 6);
+    const h = ws.getRow(3); ['Rama', 'Pareja', 'Jugador 1', 'Jugador 2', 'Cabeza de serie'].forEach((t, i) => h.getCell(i + 1).value = t); head(h, C.blue);
+    [10, 30, 30, 30, 16].forEach((w, i) => ws.getColumn(i + 1).width = w);
+    let r = 4;
+    st.teams.filter(t => !t.out).sort((a, b) => a.cat.localeCompare(b.cat) * -1 || (a.seed || 99) - (b.seed || 99) || a.name.localeCompare(b.name)).forEach(t => {
+      const row = ws.getRow(r++); [t.cat === 'F' ? 'Mujeres' : 'Hombres', t.name, t.p1, t.p2, t.seed ? '★ ' + t.seed : ''].forEach((x, i) => { const c = row.getCell(i + 1); c.value = x; c.border = box; });
+    });
+    setup(ws, false);
+  }
+
+  X.build = function (ExcelJS, st, stage) {
+    const k = ctx(st, stage);
+    if (!k.stg) throw new Error('Falta el sorteo de la ' + (stage === 'J2' ? 'jornada 2' : 'jornada 1'));
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'Copa zona centro 2026'; wb.created = new Date();
+    gridSheet(wb, k, 'Programación', false);
+    gridSheet(wb, k, 'Genérica', true);
+    drawSheet(wb, k);
+    courtSheets(wb, k);
+    pairSheet(wb, k);
+    entrantsSheet(wb, k, st);
+    return wb;
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = X; else root.ExcelOut = X;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script><script>const MODE = 'web'; // 'artifact' | 'public' | 'web'
+const WEB = MODE === 'web', PUBLIC = MODE === 'public';
+const CFG = (typeof window !== 'undefined' && window.APP_CONFIG) || {};
+const SEED_TEAMS = [{"id": "t2", "name": "La Furia", "p1": "Constanza Pérez", "p2": "Catalina Pichara", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t3", "name": "Las Iglesias", "p1": "Javiera Gatica", "p2": "Montserrat Iglesias", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t9", "name": "FueKev", "p1": "Cristian Fuentes", "p2": "Kevin Toledo", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t11", "name": "Cañon doble", "p1": "Brayan Saavedra", "p2": "Tomás Benavente", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t12", "name": "Bullangueros", "p1": "Erick Chacón", "p2": "Luis Gutierres", "cat": "M", "zone": "Centro", "seed": 0, "out": true}, {"id": "t13", "name": "Mecha-Corta", "p1": "Jorge Lara", "p2": "Erik Avendaño", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t14", "name": "Padelante", "p1": "Sebastián Barboza", "p2": "Alonso Carrillo", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t15", "name": "los gusanos", "p1": "Michael Jara", "p2": "Johnson Perez", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t32", "name": "Valkiria del verde", "p1": "María José González", "p2": "Yasna Quidel", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t33", "name": "Amazonas", "p1": "Valentina Silva", "p2": "Yaritza Castro", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t34", "name": "Infiniti", "p1": "Erick Chacón", "p2": "Felipe Guitierres", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t35", "name": "La 0-0", "p1": "Adelina Ruiz", "p2": "Nicole Millacheo", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t36", "name": "Palatroques", "p1": "Francisco Pérez V.", "p2": "Felipe Cruz T.", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t40", "name": "Los Fenix", "p1": "Rodrigo Patricio Díaz Vega", "p2": "Pedro Alain García Herrera", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t41", "name": "Romanticos Viajeros", "p1": "Enzo Pujado", "p2": "Giovanny Viveros", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t43", "name": "Los Rompe Pala", "p1": "Nicolas Larrain", "p2": "Ignacio Muñoz Castro", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t44", "name": "La Franja Padelera", "p1": "Juan Pablo Villela", "p2": "Maximiliano Beltran", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t45", "name": "Las Inapelables", "p1": "Macarena Herrera", "p2": "Maria Sabel Salas", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t46", "name": "Los Máquina", "p1": "Mario Lorca", "p2": "Javier Romo", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t47", "name": "RPM Padel", "p1": "Cristian Bravo", "p2": "Byron Osses", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t48", "name": "Los Paz Cuidadana", "p1": "Stefano Mercanti", "p2": "José Poblete", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t49", "name": "Pádel Rangers", "p1": "Sebastián Herbach", "p2": "Andrés Ponce", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t50", "name": "Revancha", "p1": "Johan Ponce", "p2": "Rodolfo Arias", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t51", "name": "Milicia FC", "p1": "Jaime Cornejo", "p2": "Mauricio Toro", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t53", "name": "Los Potros", "p1": "Rodrigo Valdes", "p2": "Deivid Pardo", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t54", "name": "Estucos Soplados", "p1": "Carlos Correa", "p2": "Enyelbert Espinoza", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t55", "name": "Los Tolerancia Cero", "p1": "Cristian Cardenas", "p2": "Victor Cesped", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t57", "name": "Team.exe", "p1": "Miguel Erazo", "p2": "Claudio Cid", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t59", "name": "Los fuga y stock", "p1": "Mario Zuñiga", "p2": "Luis Mariqueo", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t60", "name": "Furia Fem", "p1": "Valeria Jiménez", "p2": "Romina Ortiz", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t61", "name": "Los Pepinos", "p1": "Sebastián Pino", "p2": "Sebastián Faundez", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t62", "name": "Los Practicantes", "p1": "Diego Arias", "p2": "Juan Pablo Gomez", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t63", "name": "Los Room", "p1": "Rodrigo Ortiz", "p2": "Nicolás Cuevas", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t66", "name": "Los Mochila", "p1": "Pedro Didier", "p2": "Francisco Guzman", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t71", "name": "Power Padel", "p1": "Paula Ruiz", "p2": "Andrea Miranda", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t81", "name": "Las Padeltructoras", "p1": "Jannys Muñoz", "p2": "Carolaine Moris", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t82", "name": "Jarritas de Pomaire", "p1": "Carla Malhue", "p2": "Catalina Jiménez", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t83", "name": "Las que corren", "p1": "Evelyn Sanchez", "p2": "Josselyn Espinosa", "cat": "F", "zone": "Centro", "seed": 0}, {"id": "t86", "name": "Los 90", "p1": "Marcos Cordova", "p2": "Johan Canales", "cat": "M", "zone": "Centro", "seed": 0}, {"id": "t92", "name": "Doble Impacto", "p1": "David Rosales", "p2": "Ivan Millan", "cat": "M", "zone": "Centro", "seed": 0}];
+const SEED_ZONES = {"M": {"Centro": 0, "IV": 12, "VIII": 11, "III": 8}, "F": {"Centro": 0, "IV": 7, "VIII": 7, "III": 5}};
+const LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAggAAADMCAMAAAAhxKvaAAAAkFBMVEX///////7+/////v7+/v/+/v7+/v3+/f39/v79/f79/f39/fz8/f77+/zy8vPZ2tu/wMKnqKmMjIt/ho55fH5ubW1iYWBKYHdbWlpbWllbWVhaWllaWVlaWVhaWVcwWYRZWFhZWFdZWFZCWG9XVlVVVFJSUVBRUE9QT05QTk1OTUxNTEsUUI8JUJkJT5gCSZXfRb/BAAAYNElEQVR42u2da5urJteA7ezQZpzB06gXPC3vNF4eou7Z+///uxdMomhMwsJDMinrQ9tJoyLcLNYJYlk9QUuIdS5Tb2nbGGPbHrv19AeteT8jM4mtQoMRsPhh8DGzBKFn2f3Bs9xw2j3DIAh8z3OdBgKE7UvTV+N9Qt+6iJZteeAbBvyG9rcDIarz/cyS1571NgShLqbdtKyqqix3cRT4riPuOcpC8yDgk4p97v64NHAIgzuo2BfuNwQhzAidWUgxAsL0x4gb7NK8qvI49F3e02hkjbAtv4Q+iVTBpYHjCqEA366coBC2G+fDusvSF+Z0N7PQcgSEnM1yb8YoZWlRZZHvihujs7XBiVPgo1gaOxc6H1kfe2D/sCx29M3Fd+vjt8f/aUBQ6mtKWF6noeeco8DncEWA9yPVhTnM253uwDfz9BXCu+X++vXpbDcGBGUYyK6oIl+g0J/DNga/EssifGFlCKBU0Ty09Q2Ed+vz99dv/x4q4buCIJ5DszrmKPQVsc6zRIvtsYWBrzNQQDN3ikLwfn99/fpyNlsDAkwtpFXkDZSCzjQuwjEjgVueNfROlw3P27J5dbhC+Pr6/XEHlfCtQRAoZOWH27MUtOzF8XmMowx2I5YSB01QCL7ggJPgrk/CNwdBWI4l6SuFuSYytztLYOeQeoLr+Lpx+LLQgPC5fX0xIIDt9LQKHKn/ub0YQd8qIeceJNqEBQUqlghPcx2/DnIHF/IJQODrQx25FpYfV0yfyiIKxuBvPsV1PHHw9funs0UGBA2lUMSu9ExuL5YEOpeHKkEYnbC+oftQn4OX1/fPFoQ7uJDPAcKOZFSajPx5JGFAK2EwmbnvSBJgK9LJruNJfn251qsBQeehaSatDnB7UQSC0DTfkdRTXMet81MCYX0X8llA4CSwbj5yFzLKgIZe3pvOIpgEMxFEymKKpejLHKzvQj4NCDuaxd1QctcPmC2iZSAbCSJnQYEKYYql+OJ+9eX3J379YUDQshPyqJuS3NSDkcDb50okIBvYMyyPsD2H6/h1HxfyiUDYNYUFf7SPnJKDhHugtPDmshSP9iJ3IbcGBD0SJO0MNvZ6ZQkIqlDEyqLvOm7x5xkIK9uLTwXCLmGtem/sRQZTCS1GcH0iFhZ7NkvxqBPWdCGfCwRSdNUA4BIVscojTXVysbZFRdDG+flrBITfnyuqhOcCoVcfZCNgroDujxc3hQiQBk+vT/sakzXtxScDQYSKEdIsNKP74zoPVwhTXMdXy/31NQ7CJ96+GBA07UVfthdhi8P/HWPECFiIQPMQ6+eI3l8+xxXCqimHZwNBtv3BJSrHlR4cjRpEJae7jl3KYbWqtWcDoVEJWNdePFCELJhxQSbVp426juu7kE8HQlOS/MfpwW+w9xMUvUELEVhC5kwyfN0n5fB0IHS2v8aDmxIjaPXrTPVpl+zF7fuLAUFrbZCzR+BB5W23HJLC4FnCdVzbhXw+EPqhYqC9SIsQAX0NMld92gUQVqpaez4Qmudrl6iwzEUg35Huwxf9JMP7++cNENZyIZ8RBNmIRwhW0swXfK+mMHKWcR2lqrXN638UBNYJIWCC+lsZoQnlNAYphEmuIxrUp93ThYSBwMdFQfKJICRZK+I4hB2FstArIgXai/+mEJti5vq0O7qQIBBYWitIWU8Cgfet24rn+WFaJcCiscqTdzkgB1TSzECxyEmu44t71XWUUw6bRwKB61xfSVzrrwkgZFG/rtz1CSyLKAcXteqRAUmGmbY2fd3dhYSAIKpwtAQKgmNj+yjNUUluCNqEyPqbm6H2ombwahFLcb2qNRAI+wArCZoKQm/TkY0tBNp0NDz4Al7SDJgZCyUZVrcXgSDoHfQ0DQSxzG9CwFCeHYoE3wKnatbOX592QScsbi9+CxD4DUAG3zAt3JQgzh/ImGQpbpGjZCmupRK+BwjAGpOz+oBF7MWF6tPuZC9+FxAQJBJxZsPBS5oVvdRJ56d9QUBY2oX8JiAgCzKSY7FNb24rQdSnTTw/DUTCwimHbwICrKWDQIJWSfNN+Tt313Ad16pa+y4goKkgaJyduaTr6AAVwuL24n8FhNntxYQun2RYM+UABKEL+Y0LtpdaGuxI/RZjIOicureY67iBuI6dvfj++iAgrBZiHjMW42SCsWjpndJ8r/q0O7iQwKSTd0N8byn3EXLm4SgIlo3nsxenuo46HDRVa5tHAGHH0uq67OtoqYASZJv6+FkFGuflXX5AqH/AqvW6/dQCYVEXEliYcutHK7JwERAwH8N/Ac0c9+w0Tmm+V33a+lVr85aq0XwREGwLR/nfuiVK89uLK9Snre5CfgMQELYwKHt48SdZuL04hwu5Sn3a2i7kg4OAtuLgC2hhSh6Nz1edU5qXqE/TF3HW2st/CARkSz+k6fgx9MCLS4GvWerq2Tr1aSu7kA8JQrc9xXG9IK5SCp6x+FJEY7q9uFJ92spVa48Hwi4h4VGiKNqVZUrnOySd24tkor04Lcnwij8ngbCYvfiAIOySvDhInmU7SuHjxtyLOZEZUg6Ja/15F0tx0bPWHhGE3SkswRjTXMMvO29TS5qn1qf9/DURBK4S/jMgLOnlTyxpnuo6fkxVCEvZi08IgjDm8LUM2JSS5lXr09asWntCEC7/wm8jf1ou0y5pburTtA9Nf7U+pyuEhVIOzwfC4Lz9ee1FWrj3cx2lqjW0NSBMdvMnlDSTclKSAc+iEJZxIZ8OhIs/9NyzF0utt2YJXWtr0+obn54OBBX3zrZCLc/hDvVpF89aezUgTDIVp5Q036U+bS0X8tlAUDsvH3xK863Q9XL1aWtVrT0bCGrxHlGiArYXaRFuJ9SnvX7OCML8LuSTgaC6iuuUNN+pPm2lqrXnAkEcZaM2VmgLLWmeePS2fn3aOi7kc4GgPmltWDms8qKzvOu4UNXaU4EAce9sK6hXO3p7q3h+GjTlYEC4EPcDbFQHljQ357Zb+grhY26FMLcL+UQg0EwhhNAJ5i4kYM9MNbZ56i6uo1y1hgwIZ/J3Cov/YgT59ecphYovr/hzARDmtRefBgSaAr07oEaYAMICluL8VWvPAgLNUuBIrQYC7Py0e6mEJwGB5MS1sPWQICxiKc5uLwJBYNeF3AcERqoIysFqIMxTn3Z549PmHiAk6XVJyugOIJC0ChzwMK0HwudSCmHOlAMIhITE1yWK19cIlJbEs+CjtBIIcycZlqpaAx2dUwTOTVkZBErzPHAtjeDvOiBsFnIdZ7cXoaeqaclSIDCyK8rQtbSGaB0QFnMd5045AEE4blO+IquBwAjNqjT0kKWXC1oFhDnr0y7/Qug9NAJ6AI3AGCU0yasi8l3L0vXqVgFhQddxZhfyIUG4dkwTY0mW7+v9/yLfc8TZF7pvvgYIyyQZFvmF0EcEod0NPSJ5npMoCnzPFfuNbP3SsTVAUPl9z0dxIR/wCN40vnaSo+u6R8/EtidNhBVAWNZ1lI/rfn1GELLodjEBtidrw+VB2M5en7agC/mYh3JfPfIZzZOEXx6ExV3HOV3I7/N7DXPL4iC8L1CftlzKwYCwHAjLu44zupAGhKVAWMdSbKvW0MaA8JAg/Fg4yTC3vWhAWAiE1SzFmarWDAjLgIBmOD9tVZVgQFgGhBUtxXnsRQPCIiC8Lliftsxx3QaEhUD4XFchTE45GBCWAGFN11FOOWwNCA8FwmaLV1cIU+1FA8ICIKzsOs6ScjAgzA/CclubbtmLGwPCI4Gwuus4hwtpQJgdhDXq0+Y/a82AMDsIr+jzTiBMcSENCHODcA/XUT5rbWtAeAgQ0Er1aXO7kAaEmUG4k+s42YU0IMwLwutq9WkXUw7vLwaE+4NwN9dxqgtpQJgVhPu5jrILuTUg3BmEzSv+vDMIui6kAWFOEO7pOkoupA4JBoQZQRBbm37dGwRNF9KAMCMId7cUJ9iLBoT5QHhfvT5txo1PBoQ5Qfh8BIWgZy8aEGYD4REsxbZqDXzWmgFhLhDuU582m71oQJgLhDsnGc42Pr0bEO4CwvLnp8HsxRcDwn1AeBDXUduFDDNCVYXk+iCoP4aka4Hg7SHvfh0EkWR4KPnpbEAuZFTne1XJ61AbhLpQfUpRx2tpBNC7Xwdh+/7x8/OR5CdQJfhhoC6hrzdCyHIBjwkDvAYItuWB3t293qgtfjSxjBjRmKw2+lNV0IQz7dQfg2z0Ld/9ZfNY8mLgNmLEiBEjRowYMWLEiBEjRowYMWLEiBEjRowYMWLEiBEjRowYMWLEiBEjRowYMWLEiBEjRowYMWLEiBEjRowYMWLEiBEjzyLIHhX1Ewp6l3W3fes+fEOgx6NpzUdorj6wdXoT8wag5l8Tm4F0x3NCCx5NdIZA7gt8ny4YPHfiW+hRgK78efVKy70gqocYYU8W3N5W/vTKzZzzJztNLyq+wIXrIbMBjd3k0AcwfEVzPD8IuQT+oRmWfjM0zhPrt8CDtMC2gjrLzySrA7VbiNPSutPQquTYetsKu/PKxHFk+PLj02wgcRi42FLS8GPX76LQdyFjgC3vvBFcqggyEry9jheSfV0WXKo6jwMPtsjxPuuakda+BdQovAXYC+NjC8q64C3A6gwFe8LOhJSKIIgzK7ujCv8hh7nP8Ui7T0l1DYTy7PFpXuWRZ6lMiLHrd1lRs8BR70YOQjnSBzSLQGrF8uK6SOjxvQlLyzz0MEA3O//b9Z4OPBRNtCCq9l0LaLrfR56DVEEoRw4fpZUiCBaOsu5EVZa7zWW2wKP9lFzVCOdnn3IOaV4GKqpx/HpKdnXsKpPAQRg7gJVBQODDyFUrob1m0Lx2AbpZ7jM+BIULXFlwUOaEsl4LstpTVe2TQBAHqjL5smbIea/EKdMGobkTqVVOX714Pcly5V9yngEE/sZRTYZnDLM0Uj8vEqGwkFuhrJRPlzthTYavwRLVo0sngiDOLpUwPg65PfopaCD5VVV42wG6fD1NctUZNR0E7quFvel8enHfwsoKwR1cnYKOn7VRUJMJmn3q0mD3jvSm1cHC6a0XmiA03Whrg7Dji6yjFlKYDsKA/E4g69PwFqT0LICtN9oC9fVlGgh/cqOwd1mjzmxufPWUnB4ILCE3p8RUkOYBQdjG/0q9IAy1ZhQAB1dv7OEp+eIkfFt9aZIX46YF/zavoK6ReiAAvYYhxodX535QoQsCpQyiWYfXM+ly5V4YgAD3GkQrum5IyrKs8oTwaeFBVoZ0SGJKlNeGgUIQLSgSwqj62jQAARhHQIMfe2j6fmBAAkBIdsm+TNpraR7aII2Q7NJK9mEyV9HQ6YFwCqsoxxGEpdg+lqUs8Hw/pFWSABb5txHVLtxuRZXALU1pINLA8/yQVClVX5tkELiJ6YEii2cGDhMGDu7ND3UQ6N7nj/VpyuS7IWUQmuu9qPt9EDEjwSCwzIdGFhGfze1D/+beihDXj2uI2S+ZVaynX8ErAyn9Q8yVt+DDQhpLQ9PxEMEjGHOAessVAISq6UKvm9PspuF/fr30cGG6YjgIwMByc9p/txSKNvNb8uc6H5AggvQDNynY2OwtLKTph6YFgQcJMcsgYDlOpbIyFH0Dp+mGM/NXFQTfxti2u6lxe0qfXy99oOq9XQRBPQ5Rku76+JBm4PIDwFIbTUpIQJPTkPrKIEjTJ+1aAKFZshF4G07iKZDAFdLQ2KZizKO+iQAAAXEOsD4IHhIgtBhqgbBL29/y8HU0Ah+HKo3DJuOjnPlCUqelsXtSaiyP3pQXJ3mBrkW+xnMtSz0l3zcWk7JqZK+0vIlkDT132bzy7ENVEAZLw20veGRpgHA0aiwWhz4o61hdr8voM7JLi6okgWupG/3uydYT63P7CqrmLp+SJJFbwHgLKhJ4lpaNcHBAm3xFoQICXxn2tDXY2/hDWDD5IwgI2HG8uOvUhLgQY7H0HccNu7VW02vofmEMEF/uK0HGr0/KPFD1GiT/k7tK3ZAou39oGIVoWrDfBwAHdCygpBRPkjFMjnF2fmFr9bShd1X3MYm57FPWc0bVQeCNiOMsZ1PjCK25EwFW+POw3r+U1qGjaGs5Lf6i61t7QaEHrgUWRcLGtdDSIOAfbf+xPDjMCVp+HEcmiYPTu4n14k0lDpBmWSoHlG63YhBHSFNG54osAkBA3FHK6FhsM8Rqw+i1qlXY/J0HQQtFux/hKB8JMZMycmy0uEYITs2ne++4ICTxQUvwO3gnRpVBEEE9uRW300Zn10vr5H5argEAghjJPB0bB64L32CDkPztSi6wes7HcllGmH6cXR8EKYjBEuacBuS4WLDS9eEg9N9hHyLt7CNNRUUCWmdpaEgg1a5XDHBMfGH0w1LvyWM09WNPlWNqHQlxnZy1QPkGQ2ORHETBWBTdR7o+6w+ICIq1n+iBQNN/b4/kxev3sbqddMFYzAAgiHEIWL3PdrRXE0BVcuFYcrT4FLSx3S34qp6PaIETEN6ChPVbsPcUK0t03UfpSiIbOO3j24VDBwSmVlly6frEd9Q9p6nu40lc/yPaFXWx61fqQNZY3nEiniUZCaAf43b8IKJ5vU/khIWa49HPNRBfoe54RJ9xbD0ZBKHgOv2mDAJrqxyFZlcheXB9p5D42yv3Xz+ymLZ94AEgQIcOc1zPD1PYMDQ92RJMmyd3UYFEOQV5aAEWVcxMCjjzOY07L1PseICFmN9ur4qdgcP9/V4WVZDRBRlUQWDZsexZlAD7StWng+u7maCeuLsSYsbqkUGH+H9Yx9/g9dv5rQQC7k+ivCiKvB+rVQov4jjApxZ4cuatU+7oSvrgIgiAIWB52C+M4DYD3nSJUUUQWBq1wd0mQAtrBb8+aGcWy2IHoakgKItIIheh27hx2HILCtMIH3vaDwWxYYmHirVa7qNGh/EWODQZ1QiO2G3ijoYmBrkGvxXveiRDjoGIt0VyhkH4wpvuA0UQBPvS/0FAHMX1fhvyhpR+DnINQdcJqlq58eKL7KOpHZeDmwq23iA8PGLvuEp5n489yfNQDDO3GnN2jiKyBASYwzB2w4GxWNUHqeobS5McAxGWIZawFvGwV0lFqIIgsoeHbX/K2/YGIDhpz4XXq2I+GovCZFbPAvOep2xfkigMSS4nHm7eQmRsyBUOlCIBfzWVIfSfvGK8BfGenfstnAP3kJ3GYyRccB9JEt0CoRsBUVLVS/82Re2cczAI0L09Z9d3JTEsYZpVzG0fkEwZhEMrKE3yPE8oSK+f5/L78k+uECk/pbF5C7I8T+nuLEwvNiFaOPADH1v2yK6XC8WrYo29/gqd5hdpksOOp169mtNmndYDAbmJPAiKiuVC8apyCbBsIPEVHlZshnpVXq3fJBsNKjx2w8F6JkarGJHtYYQDjEVS1D2/oyYIQhn+Laf9JdO3WZXkmpnVQOA2hvQ2yrsKpoIwMPtlDj5uWqz9Kq+0OIlE9O21QV6o+y0oIowOCsHhvYMD7lF43KQ5LzfRBqELIDWxqy4nL4KaP5Bce7UmCL0CjVwrDa2hEYaV6Mf3zlVcF6nslHddeJI4gSVhy9EWZKS1EEQFJg49T0RckWfPtTRITkIT8ujU46G+6k0KM6wIApZfhylucZkIAme+Oovxi9hoqbD/sldteCzNaUSKj/xzKwXZzEIy0oLixEGz515oBD9q9sp7YzbC2G5oml41FsWT6emrwkRoiq3S5qNDEXejLk+bJKprILQbkUX1rQYI0vUCBDcF7+m+sBuakVwVhKjYp3xpZv3tp6GjEiP3235iZO8hLGJ//J9Sk26+BhIua5lS0msBSUU1QnvhcWnwOVTIGV0a6iQ9l/yqRhAL2+74zd1hKeb6sUqOf9rn37gMQvv4pNYCoXf9W/99EiUfUjhwY32QVMp+hxfEZZWlfPy5s8GRSMtSRHdUKIz27QOz5PRAYWtn3ecKGUQ3iIsql1pQVLFwEDpYPO7bBdgJHdsa2azAO47FY3LdfcQhab95UD/8RrvD382FnPSk/UZyBQRfupGnAcLgepGNVX+NFoTdaB8QRRCaLIMXRHF+SNqV2eGICqWdIfIDw84YQKHckFs9c2iBH8ZZ2TShzOMPr5d3E9Yitw2wgED810jG6oJcfQs08s3Tn6fulb5xxXhX/Brgetx7DQy9iaPToMZPtUXKqYnKAo7NwZeeh2ENORzYNGgB6q8f3mFs+L//sJ5f7nSUGOofnWWvf6QZst/6f6KzcIcndrKJg67GQEAX5MZTz785vFDxXsqPVL0e8ho3OgEOg43FHh3QUV4XHqjVkKstQIejxxzLyH9cjkD9dfr7/wEfrNF89p+kEQAAAABJRU5ErkJggg==', STRIP = 'data:image/png;base64,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';
+const E = window.Engine; let LSKEY = 'copa-centro-2026-v1'; let DEMO = false;
+
+let state = null, role = MODE === 'artifact' ? 'org' : 'viewer', screenMode = false, tab = 'inicio';
+let sub = { j1: 'sorteo', j2: 'sorteo', pos: 'j1' }, filt = { rama: 'all', group: 'all' };
+let reveal = null, revealTimer = null, confirmRedo = null, toastT = null, notice = '';
+let dbDoc = null, downloads = null, lastTs = 0, syncMode = PUBLIC ? 'web' : 'local', updatedAt = null;
+let fb = null, fbRef = null, online = false, pubState = 'ok', dirty = false, lastPub = null, userEmail = '', loginOpen = false, loginErr = '', booted = false;
+const org = () => role === 'org', edit = () => role !== 'viewer';
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const TABS_ALL = [['inicio', 'Inicio'], ['inscritos', 'Inscritos'], ['j1', 'Jornada 1'], ['pos', 'Posiciones'], ['j2', 'Jornada 2'], ['llaves', 'Llaves y podio'], ['final', 'Gran Final']];
+const tabs = () => TABS_ALL.concat(org() ? [['ajustes', 'Ajustes y respaldo']] : []);
+
+/* ---------- estado y persistencia ---------- */
+function freshState() {
+  const st = E.newState(JSON.parse(JSON.stringify(SEED_TEAMS)));
+  st.zones = JSON.parse(JSON.stringify(SEED_ZONES)); st.ts = 0; st.updated = null;
+  return st;
+}
+function tryLocal() { try { const j = localStorage.getItem(LSKEY); return j ? JSON.parse(j) : null; } catch (e) { return null; } }
+function ensure(st) { st.zones = st.zones || JSON.parse(JSON.stringify(SEED_ZONES)); st.tb = st.tb || {}; st.results = st.results || {}; st.settings = Object.assign(E.defaults(), st.settings || {}); return st; }
+let saveT = null;
+function save() {
+  if (PUBLIC || !edit()) return;
+  state.ts = Date.now(); state.updated = new Date().toISOString(); lastTs = state.ts;
+  clearTimeout(saveT);
+  if (DEMO) { try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch (e) {} return; }
+  if (WEB) { dirty = true; pubState = 'pending'; try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch (e) {} saveT = setTimeout(publish, 400); return; }
+  saveT = setTimeout(async () => {
+    try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch (e) {}
+    if (dbDoc && org()) {
+      try { await dbDoc.set({ json: JSON.stringify(state), ts: state.ts }); syncMode = 'cloud'; }
+      catch (e) { syncMode = 'local'; }
+      render();
+    }
+  }, 500);
+}
+async function publish() {
+  if (!WEB || !fbRef || !edit() || !dirty) return;
+  clearTimeout(saveT);
+  if (!online) { pubState = 'err'; render(); return; }
+  pubState = 'pending';
+  const snapTs = state.ts;
+  try {
+    await Promise.race([fbRef.set({ json: JSON.stringify(state), ts: state.ts }), new Promise((_, rj) => setTimeout(() => rj(new Error('timeout')), 12000))]);
+    if (state.ts === snapTs) { dirty = false; pubState = 'ok'; lastPub = new Date(); try { localStorage.removeItem(LSKEY + '-dirty'); } catch (e) {} } else { return publish(); }
+  } catch (e) { pubState = 'err'; }
+  render();
+}
+setInterval(() => { if (WEB && dirty && pubState !== 'pending') publish(); }, 8000);
+function toast(msg) { clearTimeout(toastT); let t = $('#toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; document.body.appendChild(t); } t.textContent = msg; t.hidden = false; toastT = setTimeout(() => { t.hidden = true; }, 3200); }
+
+/* ---------- utilidades de vista ---------- */
+const tm = () => E.teamMap(state);
+const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+const stageDate = st => st === 'J2' ? state.settings.d2 : state.settings.d1;
+const dlabel = iso => { const d = new Date(iso + 'T12:00:00'); const s = d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }); return s.charAt(0).toUpperCase() + s.slice(1); };
+const shortDate = iso => { const d = new Date(iso + 'T12:00:00'); return d.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' }); };
+const stg = st => st === 'J2' ? state.j2 : state.j1;
+const active = cat => state.teams.filter(t => !t.out && (!cat || t.cat === cat));
+function isLive(m) { return todayISO() === stageDate(m.stage) && nowMin() >= m.startMin && nowMin() < m.endMin; }
+function nameOf(id) { const t = tm()[id]; return t ? t.name : '—'; }
+function tlabel(id, seed) { const t = tm()[id]; if (!t) return ''; return `<span title="${esc(t.p1)} / ${esc(t.p2)}">${seed && t.seed ? '<span class="star">★</span> ' : ''}${esc(t.name)}</span>`; }
+const tc = s => String(s || '').replace(/\s+/g, ' ').trim().replace(/(^|[\s.-])(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase()).replace(/\p{Lu}+/gu, w => (w.length > 2 && String(s).trim() === String(s).trim().toUpperCase()) ? w[0] + w.slice(1).toLowerCase() : w);
+const rama = c => c === 'M' ? 'Hombres' : 'Mujeres';
+const counts = () => ({ M: active('M').length, F: active('F').length });
+function progress(st) {
+  const s = stg(st); if (!s) return { done: 0, total: 0 };
+  const ms = s.matches.filter(m => { const v = E.view(state, m); return v.a || m.phase === 'grupos'; });
+  return { done: s.matches.filter(m => E.winner(E.view(state, m), state.results[m.id])).length, total: s.matches.length };
+}
+
+/* ---------- componentes ---------- */
+function scoreCell(m, side, r, v) {
+  const val = r && r['g' + side] != null ? r['g' + side] : '';
+  if (edit() && !screenMode && v.a && v.b) return `<input class="sc adm" inputmode="numeric" maxlength="2" data-k="${m.id}:${side}" data-m="${m.id}" data-s="${side}" value="${esc(val)}" aria-label="Games ${side === 'a' ? 'pareja A' : 'pareja B'}">`;
+  return val === '' ? '' : `<span class="scv">${esc(val)}</span>`;
+}
+function matchCard(m) {
+  const v = E.view(state, m), r = state.results[m.id] || {}, w = E.winner(v, r), live = isLive(m);
+  const nm = (id, side) => id ? tlabel(id, m.stage === 'J1') : `<span class="ref">${esc(E.refText(side === 'a' ? m.ra : m.rb))}</span>`;
+  const cls = side => w ? (w === (side === 'a' ? v.a : v.b) ? 'win' : 'lose') : '';
+  const tie = r.ga !== undefined && r.ga !== '' && +r.ga === +r.gb && !w;
+  const meta = m.phase === 'ko' ? `${esc(m.round)}${m.koId.match(/\d/) ? ' ' + m.koId.slice(-1) : ''}` : esc(E.groupName(m.group));
+  return `<div class="match ${m.cat}${live ? ' live' : ''}"><div class="cb" title="Cancha ${m.court}">${m.court}</div><div class="mb">
+    <div class="meta"><span>${E.fmt(m.startMin)}–${E.fmt(m.endMin)} · ${meta}</span><span>${live ? '<span class="chip ok">En juego</span>' : (w ? 'Finalizado' : '')}</span></div>
+    <div class="side ${cls('a')}"><div class="nm">${nm(v.a, 'a')}</div>${scoreCell(m, 'a', r, v)}</div>
+    <div class="side ${cls('b')}"><div class="nm">${nm(v.b, 'b')}</div>${scoreCell(m, 'b', r, v)}</div>
+    ${tie && edit() && !screenMode ? `<div class="win-btns adm">Empate: ¿quién ganó el tie break? <button class="btn sm" data-act="win" data-m="${m.id}" data-w="a">A</button><button class="btn sm" data-act="win" data-m="${m.id}" data-w="b">B</button></div>` : ''}
+  </div></div>`;
+}
+function groupTable(cat, g, sd, qset, q3set) {
+  const rows = sd.rows.map(r => {
+    const cls = qset && qset.has(r.id) ? (r.pos > 2 ? 'q3' : 'q') : '';
+    return `<tr class="${cls}"><td class="n"><b>${r.pos}</b></td><td>${tlabel(r.id, state.j1 && !state.j2 ? true : false)}${r.tied ? ` <span class="chip warn">empate</span>${edit() && !screenMode ? ` <button class="btn sm adm" data-act="tb" data-t="${r.id}">+ super tie break</button>` : ''}` : ''}${r.tb ? ` <span class="chip gold">STB ${r.tb}</span>` : ''}</td>
+      <td class="n">${r.pj}</td><td class="n"><b>${r.pg}</b></td><td class="n">${r.pp}</td><td class="n">${r.jf}</td><td class="n">${r.jc}</td><td class="n"><b>${r.dif > 0 ? '+' : ''}${r.dif}</b></td></tr>`;
+  }).join('');
+  return `<div class="card"><div class="row sp"><h3>${esc(E.groupName(g.id))}</h3><span class="chip ${sd.complete ? 'ok' : ''}">${sd.done}/${sd.total} partidos</span></div>
+  <div class="tbl-wrap"><table><thead><tr><th class="n">#</th><th>Pareja</th><th class="n">PJ</th><th class="n">PG</th><th class="n">PP</th><th class="n">JF</th><th class="n">JC</th><th class="n">Dif</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function groupCards(stage, cat, revealed) {
+  const s = stg(stage); if (!s) return '';
+  const gs = s.groups[cat] || [];
+  const steps = (s.steps && s.steps[cat]) || [];
+  return gs.map((g, gi) => {
+    let ids = g.teams;
+    let last = -1;
+    if (revealed != null) { const shown = steps.slice(0, revealed.cat === cat ? revealed.n : (revealed.catDone[cat] ? steps.length : 0)); ids = shown.filter(x => x.group === gi).map(x => x.team); last = shown.length ? shown[shown.length - 1].team : -1; ids = ids; g = Object.assign({}, g); g._last = last; }
+    const empty = Math.max(0, g.teams.length - ids.length);
+    return `<div class="gcard ${cat}"><header><span>${esc(E.groupName(g.id))}</span><span class="tn">${ids.length}/${g.teams.length}</span></header><ol>${ids.map((id, i) => `<li class="${g._last === id ? 'pop' : ''}"><span class="p">${i + 1}</span><span>${tlabel(id, stage === 'J1')}</span></li>`).join('')}${Array.from({ length: empty }, (_, i) => `<li class="muted"><span class="p">${ids.length + i + 1}</span><span>…</span></li>`).join('')}</ol></div>`;
+  }).join('');
+}
+function noteBox(cls, t) { return `<div class="note ${cls}">${t}</div>`; }
+const seg = (key, opts, cur) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button data-act="${key}" data-v="${v}" aria-pressed="${cur === v}">${l}</button>`).join('')}</div>`;
+
+/* ---------- vistas ---------- */
+function vInicio() {
+  const c = counts(), S = state.settings, p1 = progress('J1'), p2 = progress('J2');
+  const days = iso => Math.ceil((new Date(iso + 'T23:59:59') - new Date()) / 864e5);
+  const dd = iso => { const n = days(iso); return n > 1 ? `Faltan ${n} días` : n === 1 ? 'Es mañana' : n === 0 ? 'Es hoy' : 'Jornada realizada'; };
+  const cup = cuposFor();
+  const todayStage = todayISO() === S.d2 ? 'J2' : 'J1';
+  return `<section class="hero"><div style="position:relative;z-index:1"><span class="chip gold">Zona centro · V, RM y VI región</span><h2 style="margin-top:8px">Copa Zona Centro 2026</h2>
+    <p class="sub" style="margin:8px 0 0">Torneo de pádel por parejas. Dos jornadas para definir al campeón de la zona y a quienes viajan a la gran final.</p></div>
+    <div class="dates"><div class="d"><span class="small">Jornada 1</span><b>${esc(dlabel(S.d1))}</b><span class="small">${dd(S.d1)} · desde las ${S.start} h</span></div><div class="d"><span class="small">Jornada 2</span><b>${esc(dlabel(S.d2))}</b><span class="small">${dd(S.d2)} · desde las ${S.start} h</span></div></div></section>
+  <div class="grid g4">
+    <div class="card stat"><div class="v">${c.M}</div><div class="l">parejas de hombres</div></div>
+    <div class="card stat"><div class="v">${c.F}</div><div class="l">parejas de mujeres</div></div>
+    <div class="card stat"><div class="v">${p1.total ? p1.done + '/' + p1.total : '—'}</div><div class="l">partidos jugados · jornada 1</div>${p1.total ? `<div class="bar"><i style="width:${Math.round(100 * p1.done / p1.total)}%"></i></div>` : ''}</div>
+    <div class="card stat"><div class="v">${cup.M.Centro != null ? cup.M.Centro : '—'} + ${cup.F.Centro != null ? cup.F.Centro : '—'}</div><div class="l">cupos a la gran final (hombres + mujeres)</div></div>
+  </div>
+  <div class="card"><div class="row sp"><h3>${state.j1 || state.j2 ? 'Tablero de canchas' : 'Aún sin sorteo'}</h3>${(state.j1 || state.j2) ? seg('inicioStage', [['J1', 'Jornada 1'], ['J2', 'Jornada 2']], sub.board || todayStage) : ''}</div>${board()}</div>
+  ${resultsTicker()}`;
+}
+function board() {
+  const st = sub.board || (todayISO() === state.settings.d2 ? 'J2' : 'J1'), s = stg(st);
+  if (!s) return `<p class="muted">${st === 'J1' ? 'Cuando se haga el sorteo de la jornada 1, aquí aparecerán los partidos de cada cancha.' : 'La jornada 2 se arma cuando termina la jornada 1.'}</p>`;
+  const isToday = todayISO() === stageDate(st), n = nowMin();
+  const out = [];
+  for (let c = 1; c <= state.settings.nCourts; c++) {
+    const ms = s.matches.filter(m => m.court === c).sort((a, b) => a.startMin - b.startMin);
+    let cur = isToday ? ms.find(m => n >= m.startMin && n < m.endMin) : null;
+    const nxt = cur ? ms.find(m => m.startMin >= cur.endMin) : (isToday ? ms.find(m => m.startMin > n) : ms[0]);
+    const show = cur || nxt;
+    const v = show ? E.view(state, show) : null;
+    out.push(`<div class="court${cur ? ' live' : ''}"><div class="cn"><span>Cancha ${c}</span><span>${cur ? '<span class="chip ok">En juego</span>' : (show ? 'Próximo' : '')}</span></div>${show ? `<div class="vs"><span class="x">${E.fmt(show.startMin)} · ${show.phase === 'ko' ? esc(show.round) : esc(E.groupName(show.group))}</span><span>${v.a ? esc(nameOf(v.a)) : esc(E.refText(show.ra))}</span><span class="x">vs</span><span>${v.b ? esc(nameOf(v.b)) : esc(E.refText(show.rb))}</span></div>` : '<p class="muted small">Sin más partidos</p>'}</div>`);
+  }
+  return `<div class="courts">${out.join('')}</div>`;
+}
+function resultsTicker() {
+  const items = [];
+  [state.j1, state.j2].forEach(s => s && s.matches.forEach(m => { const v = E.view(state, m), w = E.winner(v, state.results[m.id]); if (w) items.push({ m, v, w, r: state.results[m.id] }); }));
+  if (!items.length) return '';
+  const last = items.sort((a, b) => (b.m.stage + b.m.startMin).localeCompare(a.m.stage + a.m.startMin) || b.m.startMin - a.m.startMin).slice(0, 6);
+  return `<div class="card"><h3>Últimos resultados</h3><div class="tbl-wrap"><table><tbody>${last.map(x => `<tr><td class="small muted">${E.fmt(x.m.startMin)}</td><td><b>${esc(nameOf(x.w))}</b> <span class="muted">venció a</span> ${esc(nameOf(x.w === x.v.a ? x.v.b : x.v.a))}</td><td class="n num"><b>${esc(x.r.ga)}–${esc(x.r.gb)}</b></td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function vInscritos() {
+  const q = (filt.q || '').toLowerCase();
+  const list = state.teams.filter(t => (filt.rama === 'all' || t.cat === filt.rama) && (!q || (t.name + t.p1 + t.p2).toLowerCase().includes(q)));
+  const val = E.validate(state.teams);
+  const canEdit = org() && !screenMode;
+  const rows = list.map(t => `<tr class="${t.out ? 'out' : ''}"><td>${rama(t.cat)}</td><td>${canEdit ? `<input type="text" data-f="name" data-t="${t.id}" value="${esc(t.name)}">` : esc(t.name)}</td>
+    <td>${canEdit ? `<input type="text" data-f="p1" data-t="${t.id}" value="${esc(t.p1)}">` : esc(t.p1)}</td><td>${canEdit ? `<input type="text" data-f="p2" data-t="${t.id}" value="${esc(t.p2)}">` : esc(t.p2)}</td>
+    <td class="n">${canEdit ? `<input type="number" min="0" max="40" style="width:64px;min-width:0" data-f="seed" data-t="${t.id}" value="${t.seed || ''}">` : (t.seed ? '★ ' + t.seed : '')}</td>
+    <td class="adm">${canEdit ? `<button class="btn sm" data-act="out" data-t="${t.id}">${t.out ? 'Reincorporar' : 'Retirar'}</button>` : ''}</td></tr>`).join('');
+  return `<div class="card"><div class="row sp"><h3>Parejas inscritas · zona centro</h3><div class="row"><span class="chip">${counts().M} hombres</span><span class="chip gold">${counts().F} mujeres</span></div></div>
+    ${val.length ? `<div class="grid" style="margin-top:12px">${val.map(x => noteBox(x.level === 'error' ? 'bad' : x.level === 'warn' ? '' : 'info', esc(x.msg))).join('')}</div>` : ''}
+    <div class="row" style="margin-top:12px"><input class="fld" id="q" placeholder="Buscar pareja o jugador" value="${esc(filt.q || '')}" style="max-width:280px">${seg('rama', [['all', 'Todas'], ['M', 'Hombres'], ['F', 'Mujeres']], filt.rama)}
+    ${canEdit ? `<span class="adm row"><label class="btn">Importar archivo del formulario<input id="imp" type="file" accept=".xlsx" hidden></label><button class="btn" data-act="addTeam">Agregar pareja</button></span>` : ''}</div>
+    ${canEdit && state.j1 ? noteBox('info', 'El sorteo de la jornada 1 ya está hecho: puedes editar nombres o retirar parejas, pero importar una lista nueva requiere rehacer el sorteo.') : ''}
+    <div class="tbl-wrap" style="margin-top:12px"><table><thead><tr><th>Rama</th><th>Pareja</th><th>Jugador 1</th><th>Jugador 2</th><th class="n">Serie</th><th class="adm"></th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${canEdit ? '<p class="muted small">Serie: 1 es la mejor pareja. Con 8 grupos, las series 1 a 8 quedan una por grupo. Déjalo vacío para quien no es cabeza de serie.</p>' : ''}</div>`;
+}
+
+function revealState() {
+  if (!reveal) return null;
+  return reveal;
+}
+function vSorteo(stage) {
+  const s = stg(stage), S = state.settings, key = stage === 'J1' ? 'j1' : 'j2';
+  const canEdit = org() && !screenMode;
+  let top = '';
+  if (stage === 'J1') {
+    top = `<div class="card"><div class="row sp"><div><h3>Sorteo de grupos · jornada 1</h3><p class="muted small" style="margin:6px 0 0">Cabezas de serie en grupos distintos y el resto al azar. La semilla deja el sorteo reproducible y verificable.</p></div>
+      ${canEdit ? `<div class="row adm"><label class="l">Semilla del sorteo<input class="fld" id="seed" value="${esc(S.seed || '')}" placeholder="se genera sola"></label>
+      ${confirmRedo === 'J1' ? `<button class="btn gold" data-act="draw1" data-force="1">Sí, rehacer y borrar resultados</button><button class="btn" data-act="cancelRedo">Cancelar</button>` : `<button class="btn pri" data-act="draw1">${s ? 'Rehacer sorteo' : 'Realizar sorteo'}</button>`}</div>` : ''}</div>
+      ${canEdit ? forbiddenUI() : ''}
+      ${s ? `<p class="small muted" style="margin-bottom:0">Semilla usada: <b>${esc(S.seed)}</b> · ${esc(shortDate(S.d1))}</p>` : ''}</div>`;
+  } else {
+    const ready = E.j1Complete(state);
+    top = `<div class="card"><div class="row sp"><div><h3>Sorteo por bolilleros · jornada 2</h3><p class="muted small" style="margin:6px 0 0">Los clasificados se ordenan por rendimiento en la jornada 1 y se reparten en bolilleros: cada grupo recibe una pareja de cada bolillero.</p></div>
+      ${canEdit ? `<div class="row adm">${confirmRedo === 'J2' ? `<button class="btn gold" data-act="draw2" data-force="1">Sí, rehacer jornada 2</button><button class="btn" data-act="cancelRedo">Cancelar</button>` : `<button class="btn pri" data-act="draw2" ${ready ? '' : 'disabled'}>${s ? 'Rehacer sorteo' : 'Armar jornada 2'}</button>`}</div>` : ''}</div>
+      ${!state.j1 ? noteBox('', 'Primero se realiza el sorteo de la jornada 1.') : (ready ? '' : noteBox('', `Faltan ${progress('J1').total - progress('J1').done} resultados de la jornada 1 para poder armar la jornada 2.`))}
+      ${s && s.info ? Object.entries(s.info).map(([cat, i]) => i.rematch ? noteBox('', `${rama(cat)}: no fue posible evitar que se repitan cruces de la jornada 1 en algún grupo.`) : '').join('') : ''}
+      ${canEdit ? `<label class="row adm" style="margin-top:10px"><input type="checkbox" data-set="avoidRematch" ${S.avoidRematch ? 'checked' : ''}> Evitar que parejas del mismo grupo de la jornada 1 vuelvan a coincidir (si es posible)</label>` : ''}</div>`;
+  }
+  if (!s) return top;
+  const rv = reveal && reveal.stage === stage ? reveal : null;
+  const cats = ['M', 'F'].filter(c => (s.groups[c] || []).length);
+  const buckets = stage === 'J2' ? cats.map(c => s.info[c] ? `<div class="card"><h3>Bolilleros · ${rama(c)}</h3><div class="grid g4" style="margin-top:12px">${s.info[c].buckets.map((b, i) => `<div class="bk"><h4>Bolillero ${i + 1}</h4>${b.map(id => `<div>${esc(nameOf(id))} <span class="muted small">(${esc(E.groupName(s.info[c].origin[id]))})</span></div>`).join('')}</div>`).join('')}</div></div>` : '').join('') : '';
+  const body = cats.map(c => `<div class="card"><div class="row sp"><h3>${rama(c)}</h3>${rv && !rv.done ? `<button class="btn sm" data-act="skip">Saltar animación</button>` : ''}</div><div class="grid g4" style="margin-top:12px">${groupCards(stage, c, rv && !rv.done ? rv : null)}</div></div>`).join('');
+  return top + body + buckets + (cats.length ? `<div class="row">${!org() ? '' : `<button class="btn adm" data-act="xls" data-st="${stage}">Descargar Excel de la jornada ${stage === 'J1' ? 1 : 2}</button>`}</div>` : '');
+}
+function forbiddenUI() {
+  const S = state.settings, tms = active().sort((a, b) => a.name.localeCompare(b.name));
+  const opt = `<option value="">—</option>` + tms.map(t => `<option value="${t.id}">${esc(t.name)} (${t.cat})</option>`).join('');
+  return `<details style="margin-top:10px"><summary class="muted small" style="cursor:pointer">Restricciones: parejas que no deben quedar en el mismo grupo (${(S.forbidden || []).length})</summary>
+    <div class="row" style="margin-top:8px"><select class="fld" id="fa" style="max-width:240px">${opt}</select><select class="fld" id="fb" style="max-width:240px">${opt}</select><button class="btn sm" data-act="addForb">Agregar</button></div>
+    ${(S.forbidden || []).map((p, i) => `<div class="small" style="margin-top:6px">${esc(nameOf(p[0]))} ✕ ${esc(nameOf(p[1]))} <button class="btn sm" data-act="delForb" data-i="${i}">Quitar</button></div>`).join('')}</details>`;
+}
+function vPartidos(stage) {
+  const s = stg(stage); if (!s) return noteBox('', stage === 'J1' ? 'Realiza primero el sorteo de la jornada 1.' : 'La jornada 2 se arma al terminar la jornada 1.');
+  const groups = [...new Set(s.matches.filter(m => m.phase === 'grupos').map(m => m.group))];
+  const list = s.matches.filter(m => (filt.rama === 'all' || m.cat === filt.rama) && (filt.group === 'all' || m.group === filt.group || (m.phase === 'ko' && filt.group === 'ko')));
+  const blocks = [...new Set(list.map(m => m.startMin + '-' + m.endMin))].sort((a, b) => parseInt(a) - parseInt(b));
+  const p = progress(stage);
+  return `<div class="card"><div class="row sp"><div class="row"><h3>${dlabel(stageDate(stage))}</h3><span class="chip ${p.done === p.total && p.total ? 'ok' : ''}">${p.done}/${p.total} partidos</span></div>
+    <div class="row">${seg('rama', [['all', 'Todas'], ['M', 'Hombres'], ['F', 'Mujeres']], filt.rama)}<select class="fld" id="fg" style="width:auto"><option value="all">Todos los grupos</option>${groups.map(g => `<option value="${g}" ${filt.group === g ? 'selected' : ''}>${esc(E.groupName(g))}</option>`).join('')}${stage === 'J2' ? `<option value="ko" ${filt.group === 'ko' ? 'selected' : ''}>Llaves</option>` : ''}</select></div></div>
+    ${edit() && !screenMode ? '<p class="muted small adm" style="margin:8px 0 0">Anota los games de cada pareja y presiona Enter o Tab. Si hay empate, elige quién ganó el tie break.</p>' : ''}
+    ${blocks.map(b => { const [a, e] = b.split('-').map(Number); return `<div class="block"><div class="block-h"><span class="t">${E.fmt(a)} – ${E.fmt(e)}</span></div><div class="mgrid">${list.filter(m => m.startMin === a && m.endMin === e).sort((x, y) => x.court - y.court).map(matchCard).join('')}</div></div>`; }).join('')}</div>`;
+}
+function vJ1() { return `<div class="row">${seg('j1sub', [['sorteo', 'Sorteo'], ['partidos', 'Partidos y resultados']], sub.j1)}</div>` + (sub.j1 === 'sorteo' ? vSorteo('J1') : vPartidos('J1')); }
+function vJ2() { return `<div class="row">${seg('j2sub', [['sorteo', 'Sorteo y bolilleros'], ['partidos', 'Partidos y resultados']], sub.j2)}</div>` + (sub.j2 === 'sorteo' ? vSorteo('J2') : vPartidos('J2')); }
+
+function vPos() {
+  const which = sub.pos;
+  let out = `<div class="row">${seg('possub', [['j1', 'Jornada 1'], ['j2', 'Jornada 2']], which)}</div>`;
+  if (which === 'j1') {
+    if (!state.j1) return out + noteBox('', 'Aún no hay sorteo de la jornada 1.');
+    const gs = E.j1Standings(state), rk = E.j1Ranking(state);
+    ['M', 'F'].forEach(cat => {
+      if (!gs[cat].length) return;
+      out += `<div class="card"><div class="row sp"><h3>${rama(cat)} · grupos</h3><div class="row"><span class="chip ok">Clasifica 1° y 2°</span><span class="chip gold">Mejores 3°</span></div></div>
+        <div class="grid g2" style="margin-top:12px">${gs[cat].map(sd => groupTable(cat, { id: sd.group }, sd, rk[cat].qset)).join('')}</div></div>`;
+      const rows = rk[cat].ranked.map(r => `<tr class="${rk[cat].qset.has(r.id) ? (r.pos > 2 ? 'q3' : 'q') : ''}"><td class="n"><b>${r.rank}</b></td><td>${esc(nameOf(r.id))} ${r.tiedRank ? '<span class="chip warn">igualado</span>' : ''}</td><td>${esc(E.groupName(r.group))} · ${r.pos}°</td><td class="n">${r.pg}/${r.pj}</td><td class="n">${r.dif > 0 ? '+' : ''}${r.dif}</td></tr>`).join('');
+      out += `<div class="card"><h3>${rama(cat)} · ranking general (clasifican ${rk[cat].Q})</h3><div class="tbl-wrap"><table><thead><tr><th class="n">#</th><th>Pareja</th><th>Grupo</th><th class="n">PG/PJ</th><th class="n">Dif</th></tr></thead><tbody>${rows}</tbody></table></div><p class="muted small">El ranking usa el porcentaje de victorias y la diferencia de juegos por partido, para comparar grupos de distinto tamaño.</p></div>`;
+    });
+    return out;
+  }
+  if (!state.j2) return out + noteBox('', 'La jornada 2 aún no está armada.');
+  ['M', 'F'].forEach(cat => {
+    const gs = state.j2.groups[cat] || []; if (!gs.length) return;
+    out += `<div class="card"><div class="row sp"><h3>${rama(cat)} · grupos de la jornada 2</h3><span class="chip ok">Clasifican 1° y 2°</span></div><div class="grid g2" style="margin-top:12px">${gs.map(g => { const sd = E.stand2(state, cat, g.id); const qs = new Set(sd.rows.filter(r => r.pos <= 2).map(r => r.id)); return groupTable(cat, g, sd, qs); }).join('')}</div></div>`;
+  });
+  return out;
+}
+
+function koCard(m) { return matchCard(m); }
+function vLlaves() {
+  if (!state.j2) return noteBox('', 'Las llaves se arman con la jornada 2.');
+  const koM = state.j2.matches.filter(m => m.phase === 'ko');
+  const col = (cat, ids, title) => { const ms = ids.map(id => koM.find(m => m.cat === cat && m.koId === id)).filter(Boolean); return ms.length ? `<div class="col"><h4>${title}</h4>${ms.map(koCard).join('')}</div>` : ''; };
+  const pod = cat => { const p = E.podium(state, cat); if (!p.length) return ''; const medals = ['1°', '2°', '3°', '4°']; return `<div class="podium" style="margin-top:12px">${[1, 0, 2, 3].filter(i => p[i]).map(i => { const t = tm()[p[i]]; return `<div class="pod ${i === 0 ? 'p1' : ''}"><div class="m">${medals[i]}</div><div class="t">${esc(t.name)}</div><div class="pl">${esc(t.p1)} / ${esc(t.p2)}</div></div>`; }).join('')}</div>`; };
+  return ['M', 'F'].map(cat => (state.j2.groups[cat] || []).length ? `<div class="card"><h3>${rama(cat)}</h3><div class="bracket" style="margin-top:12px">${cat === 'M' ? col(cat, ['QF1', 'QF2', 'QF3', 'QF4'], 'Cuartos de final') : ''}${col(cat, ['SF1', 'SF2'], 'Semifinales')}${col(cat, ['F', 'T'], 'Final y 3er lugar')}</div>${pod(cat)}</div>` : '').join('');
+}
+
+function cuposFor() {
+  const z = JSON.parse(JSON.stringify(state.zones || {}));
+  const c = counts(); z.M = z.M || {}; z.F = z.F || {}; z.M.Centro = c.M; z.F.Centro = c.F;
+  return { M: E.cupos(z.M, 8), F: E.cupos(z.F, 8), z };
+}
+function vFinal() {
+  const cu = cuposFor(), S = state.settings;
+  const nM = cu.M.Centro, nF = cu.F.Centro;
+  const pm = E.podium(state, 'M').slice(0, nM), pf = E.podium(state, 'F').slice(0, nF);
+  const zrows = cat => Object.keys(cu.z[cat]).map(z => `<tr><td>${z === 'Centro' ? '<b>Zona centro</b>' : esc(z)}</td><td class="n">${org() && !screenMode && z !== 'Centro' ? `<input type="number" min="0" style="width:70px;min-width:0" data-zone="${cat}:${z}" value="${cu.z[cat][z]}">` : cu.z[cat][z]}</td><td class="n num"><b style="font-size:22px">${cu[cat][z]}</b></td></tr>`).join('');
+  const fin = (ids, n) => ids.length ? ids.map((id, i) => `<tr><td class="n"><b>${i + 1}</b></td><td>${esc(nameOf(id))}</td><td class="muted">${esc(tm()[id].p1)} / ${esc(tm()[id].p2)}</td></tr>`).join('') + Array.from({ length: Math.max(0, n - ids.length) }, (_, i) => `<tr><td class="n">${ids.length + i + 1}</td><td class="muted">por definir</td><td></td></tr>`).join('') : Array.from({ length: n }, (_, i) => `<tr><td class="n">${i + 1}</td><td class="muted">por definir</td><td></td></tr>`).join('');
+  return `<div class="card"><h3>Cupos a la gran final</h3><p class="muted small" style="margin:6px 0 0">Se reparten 8 cupos por rama, proporcional a las parejas inscritas en cada zona (método del mayor resto). Zona centro se actualiza sola con los inscritos activos.</p>
+    <div class="grid g2" style="margin-top:12px"><div><h4>Hombres</h4><div class="tbl-wrap"><table><thead><tr><th>Zona</th><th class="n">Inscritos</th><th class="n">Cupos</th></tr></thead><tbody>${zrows('M')}</tbody></table></div></div>
+    <div><h4>Mujeres</h4><div class="tbl-wrap"><table><thead><tr><th>Zona</th><th class="n">Inscritos</th><th class="n">Cupos</th></tr></thead><tbody>${zrows('F')}</tbody></table></div></div></div></div>
+  <div class="grid g2"><div class="card"><h3>Clasifican · hombres (${nM})</h3><div class="tbl-wrap"><table><tbody>${fin(pm, nM)}</tbody></table></div></div>
+  <div class="card"><h3>Clasifican · mujeres (${nF})</h3><div class="tbl-wrap"><table><tbody>${fin(pf, nF)}</tbody></table></div></div></div>
+  <p class="muted small">El campeón de la zona centro es cabeza de serie en la gran final.</p>`;
+}
+
+function vAjustes() {
+  const S = state.settings, f = (k, l, t = 'text') => `<label class="l">${l}<input class="fld" type="${t}" data-set="${k}" value="${esc(S[k])}"></label>`;
+  return `<div class="card"><h3>Parámetros del torneo</h3><div class="grid g4" style="margin-top:12px">${f('d1', 'Fecha jornada 1', 'date')}${f('d2', 'Fecha jornada 2', 'date')}${f('start', 'Hora de inicio')}${f('nCourts', 'Canchas', 'number')}${f('dur1', 'Minutos por partido (jornada 1)', 'number')}${f('dur2', 'Minutos por partido de grupo (jornada 2)', 'number')}${f('durKO', 'Minutos por partido de llaves', 'number')}${f('qM', 'Clasifican a jornada 2 · hombres', 'number')}${f('qF', 'Clasifican a jornada 2 · mujeres', 'number')}${f('nG2M', 'Grupos jornada 2 · hombres', 'number')}${f('nG2F', 'Grupos jornada 2 · mujeres', 'number')}</div>
+    <p class="muted small">Los cambios de horario o de cantidad de canchas se aplican la próxima vez que se haga un sorteo.</p></div>
+  <div class="card"><h3>Respaldo y publicación</h3><div class="row" style="margin-top:12px"><button class="btn" data-act="xls" data-st="J1">Excel jornada 1</button><button class="btn" data-act="xls" data-st="J2">Excel jornada 2</button><button class="btn" data-act="exportBk">Respaldo completo (.json)</button><label class="btn">Restaurar respaldo<input id="rest" type="file" accept=".json" hidden></label></div>
+    ${WEB ? `<p class="muted small">Los resultados se publican solos en la web pública: no hay que descargar ni subir nada. El respaldo completo es solo por seguridad; guárdalo al terminar cada jornada.</p><p class="small">Estado: ${pubState === 'ok' ? '<span class="chip ok">publicado</span>' : (pubState === 'pending' ? '<span class="chip warn">publicando…</span>' : '<span class="chip bad">sin conexión, se reintenta solo</span>')}</p>` : `<p class="muted small">Esta es la versión de revisión dentro de Claude. Los resultados del torneo y la publicación para los jugadores se hacen en la versión web, donde se publican solos.</p>
+    <p class="small">Sincronización: ${syncMode === 'cloud' ? '<span class="chip ok">guardado en la nube</span>' : '<span class="chip warn">solo en este navegador</span>'}</p>`}</div>
+  <div class="card"><h3>Reiniciar</h3><p class="muted small">Borra sorteos y resultados, y vuelve a la lista de inscritos original.</p>${confirmRedo === 'RESET' ? `<button class="btn gold" data-act="reset" data-force="1">Sí, borrar todo</button> <button class="btn" data-act="cancelRedo">Cancelar</button>` : `<button class="btn" data-act="reset">Reiniciar torneo</button>`}</div>`;
+}
+
+const VIEWS = { inicio: vInicio, inscritos: vInscritos, j1: vJ1, pos: vPos, j2: vJ2, llaves: vLlaves, final: vFinal, ajustes: vAjustes };
+
+function loginModal() {
+  return `<div class="modal-bg"><form class="modal card" id="loginForm"><h3>Acceso</h3><p class="muted small">Solo para quien anota resultados u organiza. Los jugadores no necesitan entrar.</p>
+    <label class="l">Correo<input class="fld" id="lg-mail" type="email" autocomplete="username" required value="${esc(userEmail)}"></label>
+    <label class="l">Contraseña<input class="fld" id="lg-pass" type="password" autocomplete="current-password" required></label>
+    ${loginErr ? `<p class="chip bad">${esc(loginErr)}</p>` : ''}
+    <div class="row"><button class="btn pri" type="submit">Entrar</button><button class="btn" type="button" data-act="loginCancel">Cancelar</button></div></form></div>`;
+}
+function render() {
+  if (!state) return;
+  if (loginOpen && !render.force && $('#loginForm') && $('#loginForm').contains(document.activeElement)) return;
+  render.force = false;
+  const focusK = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.k : null;
+  const sy = window.scrollY;
+  const hhmm = d => d ? d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') : '';
+  let syncChip;
+  if (DEMO) syncChip = '<span class="chip warn">Modo demostración · no se publica</span>';
+  else if (WEB && edit()) syncChip = pubState === 'pending' ? '<span class="chip warn">Publicando…</span>' : (pubState === 'err' || !online ? '<button class="btn sm gold" data-act="pubnow">Sin conexión · Publicar ahora</button>' : `<span class="chip ok">Publicado${lastPub ? ' ' + hhmm(lastPub) : ''}</span>`);
+  else if (PUBLIC || WEB) syncChip = `<span class="chip">${updatedAt ? 'Actualizado ' + updatedAt : 'Cargando…'}</span>`;
+  else syncChip = syncMode === 'cloud' ? '<span class="chip ok">Guardado en la nube</span>' : '<span class="chip warn">Solo en este navegador</span>';
+  const roleBox = !WEB ? '' : DEMO ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><a class="btn sm" href="?demo=${org() ? 'marcador' : 'org'}">Ver como ${org() ? 'marcador' : 'organización'}</a>` : (edit() ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><button class="btn sm" data-act="logout">Salir</button>` : (fb ? '<button class="btn sm ghost" data-act="login">Acceso organización</button>' : ''));
+  document.body.classList.toggle('screen', screenMode);
+  $('#app').innerHTML = `<div class="top"><div class="top-in"><div class="brand"><div class="plate"><img src="${LOGO}" alt="FPY Empresas"></div><div class="title">Copa Zona Centro<small>Pádel por parejas · 2026</small></div></div>
+    <div class="top-r">${syncChip}${roleBox}${!org() ? '' : `<button class="btn sm" data-act="screen">${screenMode ? 'Salir de modo pantalla' : 'Modo pantalla'}</button>`}</div></div>
+    <nav class="nav" aria-label="Secciones">${tabs().map(([k, l]) => `<button data-act="tab" data-v="${k}" ${tab === k ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav></div>
+    <main>${notice ? noteBox('info', esc(notice)) : ''}${(tabs().some(t => t[0] === tab) ? VIEWS[tab] : vInicio)()}</main>${loginOpen ? loginModal() : ''}
+    <div class="foot"><div class="plate"><img src="${STRIP}" alt="Inmobiliaria PY, Inmobiliaria Proyección, Constructora Carrán, Maquinaria Carrán"></div><span class="muted small">Empresas FPY · Constructora Carrán</span></div>`;
+  window.scrollTo(0, sy);
+  if (focusK) { const el = document.querySelector(`[data-k="${focusK}"]`); if (el) { el.focus(); try { el.select(); } catch (e) {} } }
+}
+
+/* ---------- acciones ---------- */
+function startReveal(stage) {
+  const s = stg(stage); clearInterval(revealTimer);
+  const cats = ['M', 'F'].filter(c => (s.groups[c] || []).length);
+  const total = cats.reduce((n, c) => n + s.steps[c].length, 0);
+  if (reduce || !total) { reveal = null; return; }
+  reveal = { stage, cat: cats[0], n: 0, catDone: {}, done: false, cats };
+  revealTimer = setInterval(() => {
+    const len = s.steps[reveal.cat].length;
+    if (reveal.n < len) reveal.n++;
+    else { reveal.catDone[reveal.cat] = true; const i = cats.indexOf(reveal.cat); if (i + 1 < cats.length) { reveal.cat = cats[i + 1]; reveal.n = 0; } else { reveal.done = true; clearInterval(revealTimer); } }
+    render();
+  }, 260);
+}
+async function downloadXlsx(stage) {
+  if (!downloads) { toast('La descarga no está disponible en esta vista'); return; }
+  if (!stg(stage)) { toast('Falta el sorteo de esa jornada'); return; }
+  try {
+    const wb = ExcelOut.build(ExcelJS, state, stage);
+    const buf = await wb.xlsx.writeBuffer();
+    await downloads.save({ filename: `Fixture_Jornada${stage === 'J1' ? 1 : 2}_Copa_Zona_Centro_2026.xlsx`, data: new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }) });
+  } catch (e) { if (!e || e.code !== 'declined') toast('No se pudo generar el Excel'); }
+}
+async function saveText(name, text) {
+  if (!downloads) { toast('La descarga no está disponible en esta vista'); return; }
+  try { await downloads.save({ filename: name, data: new Blob([text], { type: 'application/json' }) }); } catch (e) { if (!e || e.code !== 'declined') toast('No se pudo descargar'); }
+}
+function publicState() {
+  const s = JSON.parse(JSON.stringify(state)); delete s.log; return s;
+}
+function ensureDraw1(force) {
+  const hasRes = Object.keys(state.results).length > 0;
+  if (state.j1 && hasRes && !force) { confirmRedo = 'J1'; render(); return; }
+  confirmRedo = null;
+  const seed = ($('#seed') && $('#seed').value.trim()) || ('copa-' + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, ''));
+  state.settings.seed = seed;
+  E.makeJ1(state, seed); sub.j1 = 'sorteo'; startReveal('J1'); save(); render();
+}
+function ensureDraw2(force) {
+  if (!E.j1Complete(state)) return;
+  if (state.j2 && !force) { confirmRedo = 'J2'; render(); return; }
+  confirmRedo = null;
+  // al rehacer la jornada 2 se borran solo los resultados de J2
+  Object.keys(state.results).forEach(k => { if (k.startsWith('J2-')) delete state.results[k]; });
+  state.tb = {};
+  E.makeJ2(state); startReveal('J2'); save(); render();
+}
+function importFile(file) {
+  const rd = new FileReader();
+  rd.onload = async () => {
+    try {
+      const wb = new ExcelJS.Workbook(); await wb.xlsx.load(rd.result);
+      const ws = wb.worksheets[0], hdr = {};
+      ws.getRow(1).eachCell((c, i) => { hdr[E.norm(c.value && c.value.result !== undefined ? c.value.result : c.value)] = i; });
+      const col = k => hdr[Object.keys(hdr).find(h => h.startsWith(k))];
+      const cI = col('id'), c1 = col('nombre jugador 1'), c2 = col('nombre jugador 2'), cC = col('categoria'), cN = col('nombre del equipo'), cR = col('region');
+      if (!c1 || !c2 || !cC || !cN || !cR) { toast('No reconozco las columnas del formulario'); return; }
+      const cv = (row, i) => { const v = row.getCell(i).value; return String(v && v.text ? v.text : (v == null ? '' : v)).replace(/\s+/g, ' ').trim(); };
+      const all = [], zones = { M: {}, F: {} };
+      ws.eachRow((row, n) => {
+        if (n === 1) return;
+        const cat = E.norm(cv(row, cC)).startsWith('m') ? 'M' : 'F', reg = cv(row, cR);
+        if (!cv(row, c1)) return;
+        const zone = /centro/i.test(reg) ? 'Centro' : reg.replace(/\s*regi[oó]n/i, '').trim();
+        const p1 = tc(cv(row, c1)), p2 = tc(cv(row, c2)); let name = cv(row, cN); if (name === name.toUpperCase()) name = name.toLowerCase().replace(/(^|\s)\S/g, x => x.toUpperCase());
+        all.push({ id: 't' + cv(row, cI || 1), name, p1, p2, cat, zone });
+      });
+      const rawZ = {}; all.forEach(t => { rawZ[t.cat] = rawZ[t.cat] || {}; });
+      // duplicados exactos (mismas jugadoras) no cuentan dos veces en otras zonas
+      const seen = new Set(), uniq = all.filter(t => { const k = t.cat + E.norm(t.p1) + E.norm(t.p2); const kk = E.norm(t.p1) + '|' + E.norm(t.p2); if (seen.has(kk)) return false; seen.add(kk); return true; });
+      uniq.forEach(t => { if (t.zone !== 'Centro') zones[t.cat][t.zone] = (zones[t.cat][t.zone] || 0) + 1; });
+      const old = Object.fromEntries(state.teams.map(t => [t.id, t]));
+      const central = uniq.filter(t => t.zone === 'Centro').map(t => Object.assign({ seed: 0 }, t, old[t.id] ? { seed: old[t.id].seed || 0, out: old[t.id].out } : {}));
+      if (state.j1) { toast('Ya hay sorteo: rehaz el sorteo antes de importar'); return; }
+      state.teams = central; state.zones = { M: Object.assign({ Centro: 0 }, zones.M), F: Object.assign({ Centro: 0 }, zones.F) };
+      save(); notice = `Lista importada: ${central.filter(t => t.cat === 'M').length} parejas de hombres y ${central.filter(t => t.cat === 'F').length} de mujeres en zona centro.`; render();
+    } catch (e) { toast('No se pudo leer el archivo'); }
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, v = b.dataset.v;
+  if (a === 'tab') { tab = v; notice = ''; filt.group = 'all'; render(); window.scrollTo(0, 0); return; }
+  if (a === 'screen') { screenMode = !screenMode; render(); return; }
+  if (a === 'rama') { filt.rama = v; render(); return; }
+  if (a === 'j1sub') { sub.j1 = v; render(); return; }
+  if (a === 'j2sub') { sub.j2 = v; render(); return; }
+  if (a === 'possub') { sub.pos = v; render(); return; }
+  if (a === 'inicioStage') { sub.board = v; render(); return; }
+  if (a === 'login') { loginOpen = true; loginErr = ''; render(); setTimeout(() => { const m = $('#lg-mail'); if (m) m.focus(); }, 30); return; }
+  if (a === 'loginCancel') { loginOpen = false; render(); return; }
+  if (a === 'logout') { if (fb) fb.auth().signOut(); return; }
+  if (a === 'pubnow') { publish(); return; }
+  if (!edit()) return;
+  if (!org() && !['win', 'tb'].includes(a)) return;
+  if (a === 'draw1') ensureDraw1(!!b.dataset.force);
+  else if (a === 'draw2') ensureDraw2(!!b.dataset.force);
+  else if (a === 'cancelRedo') { confirmRedo = null; render(); }
+  else if (a === 'skip') { clearInterval(revealTimer); reveal = null; render(); }
+  else if (a === 'win') { const r = state.results[b.dataset.m] || {}; r.w = b.dataset.w; state.results[b.dataset.m] = r; save(); render(); }
+  else if (a === 'tb') { state.tb[b.dataset.t] = (state.tb[b.dataset.t] || 0) + 1; save(); render(); }
+  else if (a === 'out') { const t = tm()[b.dataset.t]; if (state.j1 && !t.out) { toast('Con sorteo hecho, retirar una pareja requiere rehacer el sorteo'); } t.out = !t.out; save(); render(); }
+  else if (a === 'addTeam') { const n = state.teams.length + 1000; state.teams.push({ id: 'm' + Date.now(), name: 'Nueva pareja', p1: 'Jugador 1', p2: 'Jugador 2', cat: filt.rama === 'F' ? 'F' : 'M', zone: 'Centro', seed: 0 }); save(); render(); }
+  else if (a === 'addForb') { const x = $('#fa').value, y = $('#fb').value; if (x && y && x !== y) { state.settings.forbidden.push([x, y]); save(); render(); } }
+  else if (a === 'delForb') { state.settings.forbidden.splice(+b.dataset.i, 1); save(); render(); }
+  else if (a === 'xls') downloadXlsx(b.dataset.st);
+  else if (a === 'exportWeb') saveText('estado.json', JSON.stringify(publicState()));
+  else if (a === 'exportBk') saveText(`respaldo_copa_centro_${todayISO()}.json`, JSON.stringify(state));
+  else if (a === 'reset') { if (!b.dataset.force) { confirmRedo = 'RESET'; render(); return; } state = freshState(); confirmRedo = null; reveal = null; save(); render(); }
+});
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (!org() && (t.id === 'imp' || t.id === 'rest')) return;
+  if (t.id === 'imp' && t.files[0]) { importFile(t.files[0]); return; }
+  if (t.id === 'rest' && t.files[0]) { const rd = new FileReader(); rd.onload = () => { try { state = ensure(JSON.parse(rd.result)); save(); render(); toast('Respaldo restaurado'); } catch (e) { toast('Archivo inválido'); } }; rd.readAsText(t.files[0]); return; }
+  if (t.id === 'fg') { filt.group = t.value; render(); return; }
+  if (!edit()) return;
+  if (t.classList.contains('sc')) {
+    setTimeout(() => {
+      const id = t.dataset.m, ia = document.querySelector(`[data-k="${id}:a"]`), ib = document.querySelector(`[data-k="${id}:b"]`);
+      const ga = (ia ? ia.value : '').trim(), gb = (ib ? ib.value : '').trim();
+      if (ga === '' && gb === '') delete state.results[id];
+      else if (ga !== '' && gb !== '' && !isNaN(+ga) && !isNaN(+gb)) { const prev = state.results[id] || {}; state.results[id] = { ga: +ga, gb: +gb, w: (+ga === +gb) ? (prev.w || '') : '' }; }
+      else return;
+      save(); render();
+    }, 0);
+    return;
+  }
+  if (!org()) return;
+  if (t.dataset.f) { const tt = tm()[t.dataset.t]; if (!tt) return; if (t.dataset.f === 'seed') tt.seed = t.value === '' ? 0 : Math.max(0, +t.value || 0); else tt[t.dataset.f] = t.value.trim(); save(); render(); return; }
+  if (t.dataset.zone) { const [c, z] = t.dataset.zone.split(':'); state.zones[c][z] = Math.max(0, +t.value || 0); save(); render(); return; }
+  if (t.dataset.set) { const k = t.dataset.set; state.settings[k] = t.type === 'checkbox' ? t.checked : (t.type === 'number' ? +t.value : t.value); save(); render(); }
+});
+document.addEventListener('input', ev => { if (ev.target.id === 'q') { filt.q = ev.target.value; const pos = ev.target.selectionStart; render(); const q = $('#q'); if (q) { q.focus(); q.setSelectionRange(pos, pos); } } });
+document.addEventListener('submit', async ev => {
+  if (ev.target.id !== 'loginForm') return;
+  ev.preventDefault();
+  const mail = $('#lg-mail').value.trim(), pass = $('#lg-pass').value; userEmail = mail; loginErr = '';
+  try { await fb.auth().signInWithEmailAndPassword(mail, pass); loginOpen = false; render.force = true; render(); }
+  catch (e) { loginErr = 'Correo o contraseña incorrectos'; render.force = true; render(); }
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.classList && ev.target.classList.contains('sc')) ev.target.blur(); });
+
+/* ---------- arranque ---------- */
+function loadStatic() {
+  const load = async () => { try { const r = await fetch('estado.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) { state = ensure(await r.json()); setUpdated(); render(); } } catch (e) {} };
+  load(); setInterval(load, 60000);
+}
+function setUpdated() { const d = state.updated ? new Date(state.updated) : null; updatedAt = d ? shortDate(d.toISOString().slice(0, 10)) + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') : 'sin datos aún'; }
+function bootWeb() {
+  const c = CFG.firebase || {};
+  const dm = new URLSearchParams(location.search).get('demo');
+  if ((!c.apiKey || /PEGAR/.test(c.apiKey)) && (dm === 'org' || dm === 'marcador')) {
+    DEMO = true; LSKEY += '-demo'; role = dm;
+    state = ensure(tryLocal() || freshState()); render();
+    window.addEventListener('storage', e => { if (e.key === LSKEY && e.newValue) { try { state = ensure(JSON.parse(e.newValue)); render(); } catch (x) {} } });
+    return;
+  }
+  if (!c.apiKey || /PEGAR/.test(c.apiKey) || !window.firebase) { loadStatic(); return; }
+  try { firebase.initializeApp(c); } catch (e) {}
+  fb = firebase; fbRef = fb.database().ref('estado');
+  downloads = { save: async ({ filename, data }) => { const u = URL.createObjectURL(data), a = document.createElement('a'); a.href = u; a.download = filename; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(u); }, 1500); } };
+  fb.database().ref('.info/connected').on('value', s => { online = !!s.val(); if (online && dirty) publish(); else render(); });
+  const orgs = (CFG.organizers || []).map(x => String(x).toLowerCase());
+  fb.auth().onAuthStateChanged(u => {
+    userEmail = u && u.email ? u.email : '';
+    role = !u ? 'viewer' : (orgs.includes(userEmail.toLowerCase()) ? 'org' : 'marcador');
+    if (!edit()) screenMode = false;
+    if (dirty && edit()) publish();
+    // si el organizador entra y aún no hay nada publicado, publica el estado inicial
+    if (org() && booted && !remoteExists) { state = ensure(state); dirty = true; save(); }
+    render();
+  });
+  let first = true;
+  fbRef.on('value', snap => {
+    const v = snap.val();
+    remoteExists = !!(v && v.json);
+    if (v && v.json) {
+      if (first) {
+        first = false;
+        let loc = null; try { const j = localStorage.getItem(LSKEY); loc = j ? JSON.parse(j) : null; } catch (e) {}
+        if (loc && loc.ts > (v.ts || 0) && edit()) { state = ensure(loc); lastTs = loc.ts; dirty = true; publish(); render(); booted = true; return; }
+      }
+      if (!dirty && v.ts !== lastTs) { try { state = ensure(JSON.parse(v.json)); lastTs = v.ts; setUpdated(); if (edit()) { lastPub = lastPub || new Date(); } } catch (e) {} }
+      else if (!dirty) setUpdated();
+    } else { setUpdated(); if (org() && !dirty) { dirty = true; save(); } }
+    booted = true; render();
+  }, () => { loadStatic(); });
+}
+let remoteExists = false;
+async function boot() {
+  if (PUBLIC) { state = ensure(freshState()); render(); loadStatic(); return; }
+  if (WEB) { state = ensure(freshState()); render(); bootWeb(); return; }
+  state = ensure(tryLocal() || freshState());
+  render();
+  try {
+    if (window.claude && claude.use) {
+      const [db, user, dl] = await Promise.all([claude.use('db'), claude.use('user'), claude.use('downloads')]);
+      downloads = dl;
+      if (user) { try { role = (await user.canEdit()) ? 'org' : 'viewer'; } catch (e) {} }
+      if (db) {
+        dbDoc = db.doc('torneo/estado');
+        dbDoc.onSnapshot(snap => {
+          if (!snap.exists) { if (org()) { save(); } return; }
+          const d = snap.data() || {};
+          if (d.ts && d.ts > (state.ts || 0) && d.ts !== lastTs) { try { state = ensure(JSON.parse(d.json)); lastTs = d.ts; syncMode = 'cloud'; render(); } catch (e) {} }
+          else if (syncMode !== 'cloud') { syncMode = 'cloud'; render(); }
+        }, () => {});
+      }
+      render();
+    }
+  } catch (e) { render(); }
+}
+setInterval(() => { if (tab === 'inicio' || tab === 'j1' || tab === 'j2') { const a = document.activeElement; if (!(a && a.classList && a.classList.contains('sc'))) render(); } }, 60000);
+boot();
+</script></body></html>

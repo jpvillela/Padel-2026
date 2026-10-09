@@ -751,7 +751,7 @@ let state = null, role = MODE === 'artifact' ? 'org' : 'viewer', screenMode = fa
 let sub = { j1: 'sorteo', j2: 'sorteo', pos: 'j1' }, filt = { rama: 'all', group: 'all' };
 let reveal = null, revealTimer = null, confirmRedo = null, toastT = null, notice = '';
 let dbDoc = null, downloads = null, lastTs = 0, syncMode = PUBLIC ? 'web' : 'local', updatedAt = null;
-let fb = null, fbRef = null, online = false, pubState = 'ok', dirty = false, lastPub = null, userEmail = '', loginOpen = false, loginErr = '', booted = false;
+let pubErr = '', fb = null, fbDb = null, dirtyR = false, remote = { e: null, r: null }, localChecked = false, fbRef = null, online = false, pubState = 'ok', dirty = false, lastPub = null, userEmail = '', loginOpen = false, loginErr = '', booted = false;
 const org = () => role === 'org', edit = () => role !== 'viewer';
 const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = s => document.querySelector(s);
@@ -768,8 +768,9 @@ function freshState() {
 function tryLocal() { try { const j = localStorage.getItem(LSKEY); return j ? JSON.parse(j) : null; } catch (e) { return null; } }
 function ensure(st) { st.zones = st.zones || JSON.parse(JSON.stringify(SEED_ZONES)); st.tb = st.tb || {}; st.results = st.results || {}; st.settings = Object.assign(E.defaults(), st.settings || {}); return st; }
 let saveT = null;
-function save() {
+function save(res) {
   if (PUBLIC || !edit()) return;
+  if (res) dirtyR = true;
   state.ts = Date.now(); state.updated = new Date().toISOString(); lastTs = state.ts;
   clearTimeout(saveT);
   if (DEMO) { try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch (e) {} return; }
@@ -783,16 +784,25 @@ function save() {
     }
   }, 500);
 }
+const epochOf = st => (st && st.j1 && st.j1.drawnAt) || '';
 async function publish() {
-  if (!WEB || !fbRef || !edit() || !dirty) return;
+  if (!WEB || !fbDb || !edit() || !dirty) return;
   clearTimeout(saveT);
   if (!online) { pubState = 'err'; render(); return; }
   pubState = 'pending';
-  const snapTs = state.ts;
+  const snapTs = state.ts, wantRes = !org() || dirtyR;
+  const res = { json: JSON.stringify({ epoch: epochOf(state), results: state.results, tb: state.tb, updated: state.updated }), ts: state.ts };
+  let p;
+  if (org()) {
+    const s2 = JSON.parse(JSON.stringify(state)); delete s2.results; delete s2.tb;
+    const upd = { estado: { json: JSON.stringify(s2), ts: state.ts } };
+    if (wantRes) upd.resultados = res;
+    p = fbDb.ref().update(upd);
+  } else p = fbDb.ref('resultados').set(res);
   try {
-    await Promise.race([fbRef.set({ json: JSON.stringify(state), ts: state.ts }), new Promise((_, rj) => setTimeout(() => rj(new Error('timeout')), 12000))]);
-    if (state.ts === snapTs) { dirty = false; pubState = 'ok'; lastPub = new Date(); try { localStorage.removeItem(LSKEY + '-dirty'); } catch (e) {} } else { return publish(); }
-  } catch (e) { pubState = 'err'; }
+    await Promise.race([p, new Promise((_, rj) => setTimeout(() => rj(new Error('timeout')), 12000))]);
+    if (state.ts === snapTs) { dirty = false; if (org() && wantRes) dirtyR = false; pubState = 'ok'; lastPub = new Date(); try { localStorage.removeItem(LSKEY + '-dirty'); } catch (e) {} applyRemote(); return; } else { return publish(); }
+  } catch (e) { pubState = 'err'; pubErr = String((e && (e.code || e.message)) || ''); }
   render();
 }
 setInterval(() => { if (WEB && dirty && pubState !== 'pending') publish(); }, 8000);
@@ -1051,7 +1061,7 @@ function render() {
   const hhmm = d => d ? d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') : '';
   let syncChip;
   if (DEMO) syncChip = '<span class="chip warn">Modo demostración · no se publica</span>';
-  else if (WEB && edit()) syncChip = pubState === 'pending' ? '<span class="chip warn">Publicando…</span>' : (pubState === 'err' || !online ? '<button class="btn sm gold" data-act="pubnow">Sin conexión · Publicar ahora</button>' : `<span class="chip ok">Publicado${lastPub ? ' ' + hhmm(lastPub) : ''}</span>`);
+  else if (WEB && edit()) syncChip = pubState === 'pending' ? '<span class="chip warn">Publicando…</span>' : (pubState === 'err' && /PERMISSION/i.test(pubErr) ? '<span class="chip bad">Sin permiso para publicar: avisa a la organización</span>' : (pubState === 'err' || !online ? '<button class="btn sm gold" data-act="pubnow">Sin conexión · Publicar ahora</button>' : `<span class="chip ok">Publicado${lastPub ? ' ' + hhmm(lastPub) : ''}</span>`));
   else if (PUBLIC || WEB) syncChip = `<span class="chip">${updatedAt ? 'Actualizado ' + updatedAt : 'Cargando…'}</span>`;
   else syncChip = syncMode === 'cloud' ? '<span class="chip ok">Guardado en la nube</span>' : '<span class="chip warn">Solo en este navegador</span>';
   const roleBox = !WEB ? '' : DEMO ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><a class="btn sm" href="?demo=${org() ? 'marcador' : 'org'}">Ver como ${org() ? 'marcador' : 'organización'}</a>` : (edit() ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><button class="btn sm" data-act="logout">Salir</button>` : (fb ? '<button class="btn sm ghost" data-act="login">Acceso organización</button>' : ''));
@@ -1101,7 +1111,7 @@ function ensureDraw1(force) {
   confirmRedo = null;
   const seed = ($('#seed') && $('#seed').value.trim()) || ('copa-' + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, ''));
   state.settings.seed = seed;
-  E.makeJ1(state, seed); sub.j1 = 'sorteo'; startReveal('J1'); save(); render();
+  E.makeJ1(state, seed); sub.j1 = 'sorteo'; startReveal('J1'); save(true); render();
 }
 function ensureDraw2(force) {
   if (!E.j1Complete(state)) return;
@@ -1166,8 +1176,8 @@ document.addEventListener('click', async ev => {
   else if (a === 'draw2') ensureDraw2(!!b.dataset.force);
   else if (a === 'cancelRedo') { confirmRedo = null; render(); }
   else if (a === 'skip') { clearInterval(revealTimer); reveal = null; render(); }
-  else if (a === 'win') { const r = state.results[b.dataset.m] || {}; r.w = b.dataset.w; state.results[b.dataset.m] = r; save(); render(); }
-  else if (a === 'tb') { state.tb[b.dataset.t] = (state.tb[b.dataset.t] || 0) + 1; save(); render(); }
+  else if (a === 'win') { const r = state.results[b.dataset.m] || {}; r.w = b.dataset.w; state.results[b.dataset.m] = r; save(true); render(); }
+  else if (a === 'tb') { state.tb[b.dataset.t] = (state.tb[b.dataset.t] || 0) + 1; save(true); render(); }
   else if (a === 'out') { const t = tm()[b.dataset.t]; if (state.j1 && !t.out) { toast('Con sorteo hecho, retirar una pareja requiere rehacer el sorteo'); } t.out = !t.out; save(); render(); }
   else if (a === 'addTeam') { const n = state.teams.length + 1000; state.teams.push({ id: 'm' + Date.now(), name: 'Nueva pareja', p1: 'Jugador 1', p2: 'Jugador 2', cat: filt.rama === 'F' ? 'F' : 'M', zone: 'Centro', seed: 0 }); save(); render(); }
   else if (a === 'addForb') { const x = $('#fa').value, y = $('#fb').value; if (x && y && x !== y) { state.settings.forbidden.push([x, y]); save(); render(); } }
@@ -1175,13 +1185,13 @@ document.addEventListener('click', async ev => {
   else if (a === 'xls') downloadXlsx(b.dataset.st);
   else if (a === 'exportWeb') saveText('estado.json', JSON.stringify(publicState()));
   else if (a === 'exportBk') saveText(`respaldo_copa_centro_${todayISO()}.json`, JSON.stringify(state));
-  else if (a === 'reset') { if (!b.dataset.force) { confirmRedo = 'RESET'; render(); return; } state = freshState(); confirmRedo = null; reveal = null; save(); render(); }
+  else if (a === 'reset') { if (!b.dataset.force) { confirmRedo = 'RESET'; render(); return; } state = freshState(); confirmRedo = null; reveal = null; save(true); render(); }
 });
 document.addEventListener('change', ev => {
   const t = ev.target;
   if (!org() && (t.id === 'imp' || t.id === 'rest')) return;
   if (t.id === 'imp' && t.files[0]) { importFile(t.files[0]); return; }
-  if (t.id === 'rest' && t.files[0]) { const rd = new FileReader(); rd.onload = () => { try { state = ensure(JSON.parse(rd.result)); save(); render(); toast('Respaldo restaurado'); } catch (e) { toast('Archivo inválido'); } }; rd.readAsText(t.files[0]); return; }
+  if (t.id === 'rest' && t.files[0]) { const rd = new FileReader(); rd.onload = () => { try { state = ensure(JSON.parse(rd.result)); save(true); render(); toast('Respaldo restaurado'); } catch (e) { toast('Archivo inválido'); } }; rd.readAsText(t.files[0]); return; }
   if (t.id === 'fg') { filt.group = t.value; render(); return; }
   if (!edit()) return;
   if (t.classList.contains('sc')) {
@@ -1191,7 +1201,7 @@ document.addEventListener('change', ev => {
       if (ga === '' && gb === '') delete state.results[id];
       else if (ga !== '' && gb !== '' && !isNaN(+ga) && !isNaN(+gb)) { const prev = state.results[id] || {}; state.results[id] = { ga: +ga, gb: +gb, w: (+ga === +gb) ? (prev.w || '') : '' }; }
       else return;
-      save(); render();
+      save(true); render();
     }, 0);
     return;
   }
@@ -1227,34 +1237,56 @@ function bootWeb() {
   }
   if (!c.apiKey || /PEGAR/.test(c.apiKey) || !window.firebase) { loadStatic(); return; }
   try { firebase.initializeApp(c); } catch (e) {}
-  fb = firebase; fbRef = fb.database().ref('estado');
+  fb = firebase; fbDb = fb.database();
   downloads = { save: async ({ filename, data }) => { const u = URL.createObjectURL(data), a = document.createElement('a'); a.href = u; a.download = filename; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(u); }, 1500); } };
-  fb.database().ref('.info/connected').on('value', s => { online = !!s.val(); if (online && dirty) publish(); else render(); });
+  fbDb.ref('.info/connected').on('value', s => { online = !!s.val(); if (online && dirty) publish(); else render(); });
   const orgs = (CFG.organizers || []).map(x => String(x).toLowerCase());
   fb.auth().onAuthStateChanged(u => {
     userEmail = u && u.email ? u.email : '';
     role = !u ? 'viewer' : (orgs.includes(userEmail.toLowerCase()) ? 'org' : 'marcador');
     if (!edit()) screenMode = false;
     if (dirty && edit()) publish();
-    // si el organizador entra y aún no hay nada publicado, publica el estado inicial
-    if (org() && booted && !remoteExists) { state = ensure(state); dirty = true; save(); }
+    reconcileLocal();
+    // si la organización entra y aún no hay nada publicado, publica el estado inicial
+    if (org() && booted && !remoteExists) { state = ensure(state); dirty = true; dirtyR = true; save(true); }
     render();
   });
-  let first = true;
-  fbRef.on('value', snap => {
-    const v = snap.val();
-    remoteExists = !!(v && v.json);
-    if (v && v.json) {
-      if (first) {
-        first = false;
-        let loc = null; try { const j = localStorage.getItem(LSKEY); loc = j ? JSON.parse(j) : null; } catch (e) {}
-        if (loc && loc.ts > (v.ts || 0) && edit()) { state = ensure(loc); lastTs = loc.ts; dirty = true; publish(); render(); booted = true; return; }
-      }
-      if (!dirty && v.ts !== lastTs) { try { state = ensure(JSON.parse(v.json)); lastTs = v.ts; setUpdated(); if (edit()) { lastPub = lastPub || new Date(); } } catch (e) {} }
-      else if (!dirty) setUpdated();
-    } else { setUpdated(); if (org() && !dirty) { dirty = true; save(); } }
-    booted = true; render();
-  }, () => { loadStatic(); });
+  const onSnap = () => { booted = true; applyRemote(); };
+  fbDb.ref('estado').on('value', snap => { remote.e = snap.val(); remote.eSeen = true; if (remote.rSeen) onSnap(); }, () => { loadStatic(); });
+  fbDb.ref('resultados').on('value', snap => { remote.r = snap.val(); remote.rSeen = true; if (remote.eSeen) onSnap(); }, () => {});
+}
+/* combina el estado del torneo (solo organización) con los resultados (marcador y organización) */
+function combineRemote() {
+  const e = remote.e; if (!e || !e.json) return null;
+  const st = JSON.parse(e.json), r = remote.r;
+  let rr = null; try { rr = r && r.json ? JSON.parse(r.json) : null; } catch (x) {}
+  const ok = rr && rr.epoch === epochOf(st);
+  st.results = (ok && rr.results) || {}; st.tb = (ok && rr.tb) || {};
+  st.ts = Math.max(e.ts || 0, ok ? (r.ts || 0) : 0);
+  if (ok && (r.ts || 0) > (e.ts || 0) && rr.updated) st.updated = rr.updated;
+  return st;
+}
+function applyRemote() {
+  const st = combineRemote();
+  remoteExists = !!st;
+  if (st) {
+    if (!dirty && st.ts !== lastTs) { state = ensure(st); lastTs = st.ts; setUpdated(); if (edit()) lastPub = lastPub || new Date(); }
+    else if (!dirty) setUpdated();
+    reconcileLocal(st);
+  } else { setUpdated(); if (org() && !dirty && booted) { dirty = true; dirtyR = true; save(true); } }
+  render();
+}
+/* cambios guardados en este navegador que no alcanzaron a publicarse (se revisa una vez, al tener permisos) */
+function reconcileLocal(st) {
+  if (localChecked || !edit() || !booted) return;
+  localChecked = true;
+  let loc = null; try { const j = localStorage.getItem(LSKEY); loc = j ? JSON.parse(j) : null; } catch (e) {}
+  st = st || combineRemote();
+  if (!loc || !(loc.ts > (st ? st.ts : 0))) return;
+  if (org() || !st) { if (!org()) return; state = ensure(loc); dirtyR = true; }
+  else if (epochOf(loc) === epochOf(st)) { state = ensure(Object.assign({}, st, { results: loc.results || {}, tb: loc.tb || {}, ts: loc.ts, updated: loc.updated })); }
+  else return;
+  lastTs = state.ts; dirty = true; publish();
 }
 let remoteExists = false;
 async function boot() {

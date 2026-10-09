@@ -762,11 +762,11 @@ const tabs = () => TABS_ALL.concat(org() ? [['ajustes', 'Ajustes y respaldo']] :
 /* ---------- estado y persistencia ---------- */
 function freshState() {
   const st = E.newState(JSON.parse(JSON.stringify(SEED_TEAMS)));
-  st.zones = JSON.parse(JSON.stringify(SEED_ZONES)); st.ts = 0; st.updated = null;
+  st.zones = JSON.parse(JSON.stringify(SEED_ZONES)); st.ts = 0; st.updated = null; ensure(st);
   return st;
 }
 function tryLocal() { try { const j = localStorage.getItem(LSKEY); return j ? JSON.parse(j) : null; } catch (e) { return null; } }
-function ensure(st) { st.zones = st.zones || JSON.parse(JSON.stringify(SEED_ZONES)); st.tb = st.tb || {}; st.results = st.results || {}; st.settings = Object.assign(E.defaults(), st.settings || {}); return st; }
+function ensure(st) { st.zones = st.zones || JSON.parse(JSON.stringify(SEED_ZONES)); st.fin = st.fin || { M: { out: [], reps: [] }, F: { out: [], reps: [] } }; ['M', 'F'].forEach(c => { st.fin[c] = st.fin[c] || { out: [], reps: [] }; }); st.tb = st.tb || {}; st.results = st.results || {}; st.settings = Object.assign(E.defaults(), st.settings || {}); return st; }
 let saveT = null;
 function save(res) {
   if (PUBLIC || !edit()) return;
@@ -1019,10 +1019,20 @@ function cuposFor() {
   const c = counts(); z.M = z.M || {}; z.F = z.F || {}; z.M.Centro = c.M; z.F.Centro = c.F;
   return { M: E.cupos(z.M, 8), F: E.cupos(z.F, 8), z };
 }
+function finalList(cat, n) {
+  const f = (state.fin && state.fin[cat]) || { out: [], reps: [] }, pod = E.podium(state, cat).slice(0, n);
+  const base = pod.filter(id => !f.out.includes(id));
+  const reps = f.reps.filter(id => !f.out.includes(id) && !pod.includes(id));
+  return { ids: base.concat(reps).slice(0, n), out: f.out.filter(id => pod.includes(id) || f.reps.includes(id)), pod };
+}
+function j2Teams(cat) {
+  const set = new Set(); if (state.j2) state.j2.matches.filter(m => m.cat === cat).forEach(m => { const v = E.view(state, m); if (v.a) set.add(v.a); if (v.b) set.add(v.b); });
+  return [...set];
+}
 function vFinal() {
   const cu = cuposFor(), S = state.settings;
   const nM = cu.M.Centro, nF = cu.F.Centro;
-  const pm = E.podium(state, 'M').slice(0, nM), pf = E.podium(state, 'F').slice(0, nF);
+  const LM = finalList('M', nM), LF = finalList('F', nF), pm = LM.ids, pf = LF.ids;
   const zrows = cat => Object.keys(cu.z[cat]).map(z => `<tr><td>${z === 'Centro' ? '<b>Zona centro</b>' : esc(z)}</td><td class="n">${org() && !screenMode && z !== 'Centro' ? `<input type="number" min="0" style="width:70px;min-width:0" data-zone="${cat}:${z}" value="${cu.z[cat][z]}">` : cu.z[cat][z]}</td><td class="n num"><b style="font-size:22px">${cu[cat][z]}</b></td></tr>`).join('');
   const fin = (ids, n) => ids.length ? ids.map((id, i) => `<tr><td class="n"><b>${i + 1}</b></td><td>${esc(nameOf(id))}</td><td class="muted">${esc(tm()[id].p1)} / ${esc(tm()[id].p2)}</td></tr>`).join('') + Array.from({ length: Math.max(0, n - ids.length) }, (_, i) => `<tr><td class="n">${ids.length + i + 1}</td><td class="muted">por definir</td><td></td></tr>`).join('') : Array.from({ length: n }, (_, i) => `<tr><td class="n">${i + 1}</td><td class="muted">por definir</td><td></td></tr>`).join('');
   return `<div class="card"><h3>Cupos a la gran final</h3><p class="muted small" style="margin:6px 0 0">Se reparten 8 cupos por rama, proporcional a las parejas inscritas en cada zona (método del mayor resto). Zona centro se actualiza sola con los inscritos activos.</p>
@@ -1030,6 +1040,10 @@ function vFinal() {
     <div><h4>Mujeres</h4><div class="tbl-wrap"><table><thead><tr><th>Zona</th><th class="n">Inscritos</th><th class="n">Cupos</th></tr></thead><tbody>${zrows('F')}</tbody></table></div></div></div></div>
   <div class="grid g2"><div class="card"><h3>Clasifican · hombres (${nM})</h3><div class="tbl-wrap"><table><tbody>${fin(pm, nM)}</tbody></table></div></div>
   <div class="card"><h3>Clasifican · mujeres (${nF})</h3><div class="tbl-wrap"><table><tbody>${fin(pf, nF)}</tbody></table></div></div></div>
+  ${org() && !screenMode ? ['M', 'F'].map(cat => { const L = cat === 'M' ? LM : LF, n = cat === 'M' ? nM : nF, f = state.fin[cat]; const done = (state.j2 || {}).matches && L.pod.length >= n; if (!done) return ''; const cand = j2Teams(cat).filter(id => !L.ids.includes(id) && !f.out.includes(id));
+    return `<div class="card"><h3>Bajas y reemplazos · ${cat === 'M' ? 'hombres' : 'mujeres'}</h3><p class="muted small" style="margin:6px 0 10px">Si una pareja clasificada no puede ir a la gran final, márcala como baja y elige quién ocupa su cupo.</p>
+    <div class="tbl-wrap"><table><tbody>${L.ids.map(id => `<tr><td>${esc(nameOf(id))}</td><td class="n"><button class="btn sm" data-act="finOut" data-cat="${cat}" data-t="${id}">No puede ir</button></td></tr>`).join('')}${f.out.map(id => `<tr class="out"><td><s>${esc(nameOf(id))}</s> <span class="muted small">baja</span></td><td class="n"><button class="btn sm" data-act="finBack" data-cat="${cat}" data-t="${id}">Reincorporar</button></td></tr>`).join('')}</tbody></table></div>
+    ${L.ids.length < n ? `<div class="row" style="margin-top:10px"><select class="fld" data-finrep="${cat}" style="max-width:320px"><option value="">Elegir reemplazo…</option>${cand.map(id => `<option value="${id}">${esc(nameOf(id))}</option>`).join('')}</select></div>` : ''}${f.reps.length ? `<p class="small muted" style="margin-top:10px">Reemplazos: ${f.reps.map(id => `${esc(nameOf(id))} <button class="btn sm" data-act="finRepDel" data-cat="${cat}" data-t="${id}">Quitar</button>`).join(' · ')}</p>` : ''}</div>`; }).join('') : ''}
   <p class="muted small">El campeón de la zona centro es cabeza de serie en la gran final.</p>`;
 }
 
@@ -1180,6 +1194,9 @@ document.addEventListener('click', async ev => {
   else if (a === 'tb') { state.tb[b.dataset.t] = (state.tb[b.dataset.t] || 0) + 1; save(true); render(); }
   else if (a === 'out') { const t = tm()[b.dataset.t]; if (state.j1 && !t.out) { toast('Con sorteo hecho, retirar una pareja requiere rehacer el sorteo'); } t.out = !t.out; save(); render(); }
   else if (a === 'addTeam') { const n = state.teams.length + 1000; state.teams.push({ id: 'm' + Date.now(), name: 'Nueva pareja', p1: 'Jugador 1', p2: 'Jugador 2', cat: filt.rama === 'F' ? 'F' : 'M', zone: 'Centro', seed: 0 }); save(); render(); }
+  else if (a === 'finOut') { const f = state.fin[b.dataset.cat]; if (!f.out.includes(b.dataset.t)) f.out.push(b.dataset.t); save(); render(); }
+  else if (a === 'finBack') { const f = state.fin[b.dataset.cat]; f.out = f.out.filter(x => x !== b.dataset.t); save(); render(); }
+  else if (a === 'finRepDel') { const f = state.fin[b.dataset.cat]; f.reps = f.reps.filter(x => x !== b.dataset.t); save(); render(); }
   else if (a === 'addForb') { const x = $('#fa').value, y = $('#fb').value; if (x && y && x !== y) { state.settings.forbidden.push([x, y]); save(); render(); } }
   else if (a === 'delForb') { state.settings.forbidden.splice(+b.dataset.i, 1); save(); render(); }
   else if (a === 'xls') downloadXlsx(b.dataset.st);
@@ -1207,6 +1224,7 @@ document.addEventListener('change', ev => {
   }
   if (!org()) return;
   if (t.dataset.f) { const tt = tm()[t.dataset.t]; if (!tt) return; if (t.dataset.f === 'seed') tt.seed = t.value === '' ? 0 : Math.max(0, +t.value || 0); else tt[t.dataset.f] = t.value.trim(); save(); render(); return; }
+  if (t.dataset.finrep) { if (t.value) { const f = state.fin[t.dataset.finrep]; if (!f.reps.includes(t.value)) f.reps.push(t.value); save(); render(); } return; }
   if (t.dataset.zone) { const [c, z] = t.dataset.zone.split(':'); state.zones[c][z] = Math.max(0, +t.value || 0); save(); render(); return; }
   if (t.dataset.set) { const k = t.dataset.set; state.settings[k] = t.type === 'checkbox' ? t.checked : (t.type === 'number' ? +t.value : t.value); save(); render(); }
 });

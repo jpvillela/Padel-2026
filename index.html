@@ -750,7 +750,7 @@ const E = window.Engine; let LSKEY = 'copa-centro-2026-v1'; let DEMO = false;
 let state = null, role = MODE === 'artifact' ? 'org' : 'viewer', screenMode = false, tab = 'inicio';
 let sub = { j1: 'sorteo', j2: 'sorteo', pos: 'j1' }, filt = { rama: 'all', group: 'all' };
 let reveal = null, revealTimer = null, confirmRedo = null, toastT = null, notice = '';
-let dbDoc = null, downloads = null, lastTs = 0, syncMode = PUBLIC ? 'web' : 'local', updatedAt = null;
+let dbDoc = null, downloads = null, lastTs = 0, lastSig = '', syncMode = PUBLIC ? 'web' : 'local', updatedAt = null;
 let pubErr = '', fb = null, fbDb = null, dirtyR = false, remote = { e: null, r: null }, localChecked = false, fbRef = null, online = false, pubState = 'ok', dirty = false, lastPub = null, userEmail = '', loginOpen = false, loginErr = '', booted = false;
 const org = () => role === 'org', edit = () => role !== 'viewer';
 const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1322,8 +1322,10 @@ function applyRemote() {
   const st = combineRemote();
   remoteExists = !!st;
   if (st) {
-    if (!dirty && st.ts !== lastTs) { state = ensure(st); lastTs = st.ts; setUpdated(); if (edit()) lastPub = lastPub || new Date(); }
-    else if (!dirty) setUpdated();
+    /* estado y resultados llegan como dos eventos distintos (con la misma hora cuando los escribe la organización): se compara la combinación de ambas horas, no solo la mayor */
+    const sig = ((remote.e && remote.e.ts) || 0) + '|' + ((remote.r && remote.r.ts) || 0);
+    if (!dirty && sig !== lastSig) { state = ensure(st); lastTs = st.ts; lastSig = sig; setUpdated(); if (edit()) lastPub = lastPub || new Date(); }
+    else if (!dirty) { lastSig = sig; setUpdated(); }
     reconcileLocal(st);
   } else { setUpdated(); if (org() && !dirty && booted) { dirty = true; dirtyR = true; save(true); } }
   render();

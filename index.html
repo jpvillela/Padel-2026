@@ -1054,6 +1054,7 @@ function vAjustes() {
   <div class="card"><h3>Respaldo y publicación</h3><div class="row" style="margin-top:12px"><button class="btn" data-act="xls" data-st="J1">Excel jornada 1</button><button class="btn" data-act="xls" data-st="J2">Excel jornada 2</button><button class="btn" data-act="exportBk">Respaldo completo (.json)</button><label class="btn">Restaurar respaldo<input id="rest" type="file" accept=".json" hidden></label></div>
     ${WEB ? `<p class="muted small">Los resultados se publican solos en la web pública: no hay que descargar ni subir nada. El respaldo completo es solo por seguridad; guárdalo al terminar cada jornada.</p><p class="small">Estado: ${pubState === 'ok' ? '<span class="chip ok">publicado</span>' : (pubState === 'pending' ? '<span class="chip warn">publicando…</span>' : '<span class="chip bad">sin conexión, se reintenta solo</span>')}</p>` : `<p class="muted small">Esta es la versión de revisión dentro de Claude. Los resultados del torneo y la publicación para los jugadores se hacen en la versión web, donde se publican solos.</p>
     <p class="small">Sincronización: ${syncMode === 'cloud' ? '<span class="chip ok">guardado en la nube</span>' : '<span class="chip warn">solo en este navegador</span>'}</p>`}</div>
+  ${DEMO && org() ? `<div class="card"><h3>Simular torneo (solo demostración)</h3><p class="muted small">Rellena resultados al azar para probar sin anotar partido por partido. Solo existe en el modo demostración: no se publica nada ni afecta el sitio real.</p><div class="row" style="margin-top:10px"><button class="btn" data-act="simJ1">1. Sortear y jugar Jornada 1</button><button class="btn" data-act="simJ2">2. Sortear y jugar grupos de Jornada 2</button><button class="btn" data-act="simKO">3. Jugar llaves y final</button></div></div>` : ''}
   <div class="card"><h3>Reiniciar</h3><p class="muted small">Borra sorteos y resultados, y vuelve a la lista de inscritos original.</p>${confirmRedo === 'RESET' ? `<button class="btn gold" data-act="reset" data-force="1">Sí, borrar todo</button> <button class="btn" data-act="cancelRedo">Cancelar</button>` : `<button class="btn" data-act="reset">Reiniciar torneo</button>`}</div>`;
 }
 
@@ -1118,6 +1119,13 @@ async function saveText(name, text) {
 }
 function publicState() {
   const s = JSON.parse(JSON.stringify(state)); delete s.log; return s;
+}
+function simulate(a) {
+  const rnd = E.rng('sim' + Date.now()), fill = m => { if (state.results[m.id]) return; const x = rnd() < .5, l = Math.floor(rnd() * 5); state.results[m.id] = x ? { ga: 6, gb: l } : { ga: l, gb: 6 }; };
+  if (a === 'simJ1') { if (!state.j1) E.makeJ1(state, 'demo-' + Date.now()); state.j1.matches.forEach(fill); }
+  if (a === 'simJ2') { if (!E.j1Complete(state)) { toast('Primero simula la Jornada 1'); return; } if (!state.j2) E.makeJ2(state); state.j2.matches.filter(m => m.phase === 'grupos').forEach(fill); ['M', 'F'].forEach(cat => (state.j2.groups[cat] || []).forEach(g => { E.stand2(state, cat, g.id).rows.filter(r => r.tied).forEach((r, i) => { state.tb[r.id] = i + 1; }); })); }
+  if (a === 'simKO') { if (!state.j2) { toast('Primero simula los grupos de la Jornada 2'); return; } for (let g = 0; g < 6; g++) state.j2.matches.filter(m => m.phase === 'ko').forEach(m => { const v = E.view(state, m); if (v.a && v.b && !state.results[m.id]) state.results[m.id] = { ga: 2, gb: rnd() < .5 ? 0 : 1, w: '' }; }); }
+  save(true); render();
 }
 function ensureDraw1(force) {
   const hasRes = Object.keys(state.results).length > 0;
@@ -1197,6 +1205,7 @@ document.addEventListener('click', async ev => {
   else if (a === 'finOut') { const f = state.fin[b.dataset.cat]; if (!f.out.includes(b.dataset.t)) f.out.push(b.dataset.t); save(); render(); }
   else if (a === 'finBack') { const f = state.fin[b.dataset.cat]; f.out = f.out.filter(x => x !== b.dataset.t); save(); render(); }
   else if (a === 'finRepDel') { const f = state.fin[b.dataset.cat]; f.reps = f.reps.filter(x => x !== b.dataset.t); save(); render(); }
+  else if (a === 'simJ1' || a === 'simJ2' || a === 'simKO') { if (DEMO) simulate(a); }
   else if (a === 'addForb') { const x = $('#fa').value, y = $('#fb').value; if (x && y && x !== y) { state.settings.forbidden.push([x, y]); save(); render(); } }
   else if (a === 'delForb') { state.settings.forbidden.splice(+b.dataset.i, 1); save(); render(); }
   else if (a === 'xls') downloadXlsx(b.dataset.st);
@@ -1244,6 +1253,21 @@ function loadStatic() {
   load(); setInterval(load, 60000);
 }
 function setUpdated() { const d = state.updated ? new Date(state.updated) : null; updatedAt = d ? shortDate(d.toISOString().slice(0, 10)) + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') : 'sin datos aún'; }
+/* respaldo por HTTPS: si la conexión continua de Firebase se duerme o se cae (celulares, redes con filtros), se consulta cada 8 s solo la marca de hora (muy liviano) y se baja el estado completo únicamente si cambió */
+let pollBusy = false;
+async function pollRemote() {
+  if (!WEB || DEMO || !fbDb || pollBusy || document.hidden) return;
+  const base = String((CFG.firebase || {}).databaseURL || '').replace(/\/$/, ''); if (!base) return;
+  pollBusy = true;
+  try {
+    const get = p => fetch(base + p + '.json', { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const [a, b] = await Promise.all([get('/estado/ts'), get('/resultados/ts')]);
+    if ((a || 0) !== ((remote.e && remote.e.ts) || 0) || (b || 0) !== ((remote.r && remote.r.ts) || 0)) {
+      const [e, r] = await Promise.all([get('/estado'), get('/resultados')]);
+      remote.e = e; remote.r = r; remote.eSeen = remote.rSeen = true; booted = true; applyRemote();
+    }
+  } catch (x) {} finally { pollBusy = false; }
+}
 function bootWeb() {
   const c = CFG.firebase || {};
   const dm = new URLSearchParams(location.search).get('demo');
@@ -1270,6 +1294,9 @@ function bootWeb() {
     render();
   });
   const onSnap = () => { booted = true; applyRemote(); };
+  setInterval(pollRemote, 8000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { fbDb.goOnline(); } catch (x) {} pollRemote(); } });
+  window.addEventListener('online', () => { try { fbDb.goOnline(); } catch (x) {} pollRemote(); });
   fbDb.ref('estado').on('value', snap => { remote.e = snap.val(); remote.eSeen = true; if (remote.rSeen) onSnap(); }, () => { loadStatic(); });
   fbDb.ref('resultados').on('value', snap => { remote.r = snap.val(); remote.rSeen = true; if (remote.eSeen) onSnap(); }, () => {});
 }

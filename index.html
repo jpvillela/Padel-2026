@@ -1254,19 +1254,26 @@ function loadStatic() {
 }
 function setUpdated() { const d = state.updated ? new Date(state.updated) : null; updatedAt = d ? shortDate(d.toISOString().slice(0, 10)) + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') : 'sin datos aún'; }
 /* respaldo por HTTPS: si la conexión continua de Firebase se duerme o se cae (celulares, redes con filtros), se consulta cada 8 s solo la marca de hora (muy liviano) y se baja el estado completo únicamente si cambió */
-let pollBusy = false;
+let pollBusy = false; const DG = { e: 0, r: 0, poll: 0, pollHit: 0, pollErr: '', conn: null, connAt: 0 };
 async function pollRemote() {
   if (!WEB || DEMO || !fbDb || pollBusy || document.hidden) return;
   const base = String((CFG.firebase || {}).databaseURL || '').replace(/\/$/, ''); if (!base) return;
   pollBusy = true;
   try {
     const get = p => fetch(base + p + '.json', { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-    const [a, b] = await Promise.all([get('/estado/ts'), get('/resultados/ts')]);
+    const [a, b] = await Promise.all([get('/estado/ts'), get('/resultados/ts')]); DG.poll = Date.now(); DG.pollErr = '';
     if ((a || 0) !== ((remote.e && remote.e.ts) || 0) || (b || 0) !== ((remote.r && remote.r.ts) || 0)) {
       const [e, r] = await Promise.all([get('/estado'), get('/resultados')]);
-      remote.e = e; remote.r = r; remote.eSeen = remote.rSeen = true; booted = true; applyRemote();
+      remote.e = e; remote.r = r; remote.eSeen = remote.rSeen = true; booted = true; DG.pollHit = Date.now(); applyRemote();
     }
-  } catch (x) {} finally { pollBusy = false; }
+  } catch (x) { DG.pollErr = String((x && x.message) || x); } finally { pollBusy = false; }
+}
+
+if (new URLSearchParams(location.search).get('diag') === '1') {
+  const box = document.createElement('div'); box.style.cssText = 'position:fixed;right:8px;bottom:8px;z-index:99999;background:#111;color:#fff;font:12px/1.5 monospace;padding:8px 10px;border-radius:8px;opacity:.92;max-width:290px';
+  if (document.body) document.body.appendChild(box); else document.addEventListener('DOMContentLoaded', () => document.body.appendChild(box));
+  const ago = t => t ? Math.round((Date.now() - t) / 1000) + ' s' : 'nunca';
+  setInterval(() => { box.innerHTML = 'DIAGNÓSTICO<br>Conexión en vivo: <b>' + (DG.conn === null ? '…' : DG.conn ? 'ACTIVA' : 'CAÍDA') + '</b> (hace ' + ago(DG.connAt) + ')<br>Último dato en vivo: estado ' + ago(DG.e) + ' · resultados ' + ago(DG.r) + '<br>Respaldo: revisó hace ' + ago(DG.poll) + ' · trajo cambios hace ' + ago(DG.pollHit) + (DG.pollErr ? '<br>Error respaldo: ' + esc(DG.pollErr) : ''); }, 1000);
 }
 function bootWeb() {
   const c = CFG.firebase || {};
@@ -1281,7 +1288,7 @@ function bootWeb() {
   try { firebase.initializeApp(c); } catch (e) {}
   fb = firebase; fbDb = fb.database();
   downloads = { save: async ({ filename, data }) => { const u = URL.createObjectURL(data), a = document.createElement('a'); a.href = u; a.download = filename; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(u); }, 1500); } };
-  fbDb.ref('.info/connected').on('value', s => { online = !!s.val(); if (online && dirty) publish(); else render(); });
+  fbDb.ref('.info/connected').on('value', s => { online = !!s.val(); DG.conn = online; DG.connAt = Date.now(); if (online && dirty) publish(); else render(); });
   const orgs = (CFG.organizers || []).map(x => String(x).toLowerCase());
   fb.auth().onAuthStateChanged(u => {
     userEmail = u && u.email ? u.email : '';
@@ -1297,8 +1304,8 @@ function bootWeb() {
   setInterval(pollRemote, 8000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { fbDb.goOnline(); } catch (x) {} pollRemote(); } });
   window.addEventListener('online', () => { try { fbDb.goOnline(); } catch (x) {} pollRemote(); });
-  fbDb.ref('estado').on('value', snap => { remote.e = snap.val(); remote.eSeen = true; if (remote.rSeen) onSnap(); }, () => { loadStatic(); });
-  fbDb.ref('resultados').on('value', snap => { remote.r = snap.val(); remote.rSeen = true; if (remote.eSeen) onSnap(); }, () => {});
+  fbDb.ref('estado').on('value', snap => { DG.e = Date.now(); remote.e = snap.val(); remote.eSeen = true; if (remote.rSeen) onSnap(); }, () => { loadStatic(); });
+  fbDb.ref('resultados').on('value', snap => { DG.r = Date.now(); remote.r = snap.val(); remote.rSeen = true; if (remote.eSeen) onSnap(); }, () => {});
 }
 /* combina el estado del torneo (solo organización) con los resultados (marcador y organización) */
 function combineRemote() {

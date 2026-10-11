@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Copa Zona Centro 2026</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap"><style>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Copa Fabio Iglesias 2026 · Zona Centro</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap"><style>
 /* Plan de diseño: torneo de pádel de empresa. Paleta FPY (azul, carbón) + dorado Carrán; titulares en condensada deportiva, cuerpo en grotesca humanista.
    Layout: franja superior con logos y pestañas fijas, contenido en tarjetas sobre fondo frío; tablero de canchas como pieza central. */
 :root {
@@ -153,7 +153,12 @@ body.screen { font-size: 17px; }
 @media (max-width: 560px) { .hero h2 { font-size: 32px; } .title { font-size: 21px; } .plate img { height: 28px; } }
 @media (prefers-reduced-motion: reduce) { .gcard li.pop { animation: none; } }
 
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:60;padding:16px}.modal{width:min(380px,100%);display:grid;gap:12px}.btn.ghost{background:transparent}</style></head><body><div id="app"></div><script src="config.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script>/* Motor del torneo — Copa zona centro. Funciona en node y en el navegador. */
+.rules { margin: 8px 0 0; padding-left: 20px; } .rules li { margin: 6px 0; line-height: 1.45; }
+
+.tl { cursor: pointer; text-decoration: underline dotted; text-decoration-color: var(--muted); text-underline-offset: 3px; }
+.tpop { position: fixed; z-index: 9999; background: #1d2733; color: #fff; padding: 9px 12px; border-radius: 8px; font-size: 14px; line-height: 1.5; max-width: 260px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:60;padding:16px}.modal{width:min(380px,100%);display:grid;gap:12px}.btn.ghost{background:transparent}</style></head><body><div id="app"></div><script src="config.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script>/* Motor del torneo — Copa Fabio Iglesias, fase regional zona centro. Funciona en node y en el navegador. */
 (function (root) {
   const E = {};
 
@@ -430,7 +435,7 @@ body.screen { font-size: 17px; }
   /* ================= estado del torneo ================= */
   E.defaults = function () {
     return {
-      seed: '', nCourts: 6, start: '19:00', d1: '2026-10-15', d2: '2026-10-29',
+      seed: '', nCourts: 6, start: '19:00', d1: '2026-10-15', d2: '2026-10-29', dF: '2026-11-07',
       dur1: 20, dur2: 20, durKO: 40, qM: 16, qF: 8, nG2M: 4, nG2F: 2,
       cuposM: 4, cuposF: 3, avoidRematch: false, forbidden: []
     };
@@ -624,7 +629,7 @@ body.screen { font-size: 17px; }
     const { S, stg, date } = k;
     const ws = wb.addWorksheet(name, { views: [{ state: 'frozen', ySplit: 3, xSplit: 1 }] });
     const nC = S.nCourts, cols = nC + 1;
-    titleBlock(ws, `Copa zona centro 2026 · Jornada ${k.stage === 'J2' ? 2 : 1} · ${generic ? 'programación genérica' : 'programación'}`, `${dateLabel(date)} · inicio ${S.start} h · ${nC} canchas`, cols);
+    titleBlock(ws, `Copa Fabio Iglesias 2026 · Fase regional zona centro · Jornada ${k.stage === 'J2' ? 2 : 1} · ${generic ? 'programación genérica' : 'programación'}`, `${dateLabel(date)} · inicio ${S.start} h · ${nC} canchas`, cols);
     const h = ws.getRow(3); h.getCell(1).value = 'Horario'; for (let c = 1; c <= nC; c++) h.getCell(c + 1).value = 'Cancha ' + c; head(h, C.blue);
     ws.getColumn(1).width = 14; for (let c = 2; c <= cols; c++) ws.getColumn(c).width = 30;
     const blocks = [...new Set(stg.matches.map(m => m.startMin + '-' + m.endMin))].sort((a, b) => parseInt(a) - parseInt(b));
@@ -657,7 +662,7 @@ body.screen { font-size: 17px; }
     const { S, stg } = k;
     for (let c = 1; c <= S.nCourts; c++) {
       const ws = wb.addWorksheet('Cancha ' + c);
-      titleBlock(ws, `Cancha ${c} · Jornada ${k.stage === 'J2' ? 2 : 1}`, `${dateLabel(k.date)} · Copa zona centro 2026`, 8);
+      titleBlock(ws, `Cancha ${c} · Jornada ${k.stage === 'J2' ? 2 : 1}`, `${dateLabel(k.date)} · Copa Fabio Iglesias 2026 · Zona centro`, 8);
       const h = ws.getRow(3);
       ['Hora', 'Rama', 'Fase', 'Pareja A', 'Pareja B', 'Games A', 'Games B', 'Observación'].forEach((t, i) => h.getCell(i + 1).value = t); head(h, C.blue);
       [12, 9, 16, 34, 34, 10, 10, 22].forEach((w, i) => ws.getColumn(i + 1).width = w);
@@ -727,7 +732,7 @@ body.screen { font-size: 17px; }
     const k = ctx(st, stage);
     if (!k.stg) throw new Error('Falta el sorteo de la ' + (stage === 'J2' ? 'jornada 2' : 'jornada 1'));
     const wb = new ExcelJS.Workbook();
-    wb.creator = 'Copa zona centro 2026'; wb.created = new Date();
+    wb.creator = 'Copa Fabio Iglesias 2026'; wb.created = new Date();
     gridSheet(wb, k, 'Programación', false);
     gridSheet(wb, k, 'Genérica', true);
     drawSheet(wb, k);
@@ -757,7 +762,8 @@ const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const TABS_ALL = [['inicio', 'Inicio'], ['inscritos', 'Inscritos'], ['j1', 'Jornada 1'], ['pos', 'Posiciones'], ['j2', 'Jornada 2'], ['llaves', 'Llaves y podio'], ['final', 'Gran Final']];
-const tabs = () => TABS_ALL.concat(org() ? [['ajustes', 'Ajustes y respaldo']] : []);
+const REGLAS = MODE !== 'public'; /* pestaña de reglas y recuadros por jornada */
+const tabs = () => TABS_ALL.concat(REGLAS ? [['reglas', 'Reglas']] : []).concat(org() ? [['ajustes', 'Ajustes y respaldo']] : []);
 
 /* ---------- estado y persistencia ---------- */
 function freshState() {
@@ -819,7 +825,7 @@ const stg = st => st === 'J2' ? state.j2 : state.j1;
 const active = cat => state.teams.filter(t => !t.out && (!cat || t.cat === cat));
 function isLive(m) { return todayISO() === stageDate(m.stage) && nowMin() >= m.startMin && nowMin() < m.endMin; }
 function nameOf(id) { const t = tm()[id]; return t ? t.name : '—'; }
-function tlabel(id, seed) { const t = tm()[id]; if (!t) return ''; return `<span title="${esc(t.p1)} / ${esc(t.p2)}">${seed && t.seed ? '<span class="star">★</span> ' : ''}${esc(t.name)}</span>`; }
+function tlabel(id, seed) { const t = tm()[id]; if (!t) return ''; return `<span class="tl" tabindex="0" data-team="${esc(id)}" title="${esc(t.p1)} / ${esc(t.p2)}">${seed && t.seed ? '<span class="star">★</span> ' : ''}${esc(t.name)}</span>`; }
 const tc = s => String(s || '').replace(/\s+/g, ' ').trim().replace(/(^|[\s.-])(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase()).replace(/\p{Lu}+/gu, w => (w.length > 2 && String(s).trim() === String(s).trim().toUpperCase()) ? w[0] + w.slice(1).toLowerCase() : w);
 const rama = c => c === 'M' ? 'Hombres' : 'Mujeres';
 const counts = () => ({ M: active('M').length, F: active('F').length });
@@ -879,9 +885,8 @@ function vInicio() {
   const dd = iso => { const n = days(iso); return n > 1 ? `Faltan ${n} días` : n === 1 ? 'Es mañana' : n === 0 ? 'Es hoy' : 'Jornada realizada'; };
   const cup = cuposFor();
   const todayStage = todayISO() === S.d2 ? 'J2' : 'J1';
-  return `<section class="hero"><div style="position:relative;z-index:1"><span class="chip gold">Zona centro · V, RM y VI región</span><h2 style="margin-top:8px">Copa Zona Centro 2026</h2>
-    <p class="sub" style="margin:8px 0 0">Torneo de pádel por parejas. Dos jornadas para definir al campeón de la zona y a quienes viajan a la gran final.</p></div>
-    <div class="dates"><div class="d"><span class="small">Jornada 1</span><b>${esc(dlabel(S.d1))}</b><span class="small">${dd(S.d1)} · desde las ${S.start} h</span></div><div class="d"><span class="small">Jornada 2</span><b>${esc(dlabel(S.d2))}</b><span class="small">${dd(S.d2)} · desde las ${S.start} h</span></div></div></section>
+  return `<section class="hero"><div style="position:relative;z-index:1"><span class="chip gold">Fase regional · Zona centro · V, RM y VI región</span><h2 style="margin-top:8px">Copa Fabio Iglesias 2026</h2></div>
+    <div class="dates"><div class="d"><span class="small">Jornada 1</span><b>${esc(dlabel(S.d1))}</b><span class="small">${dd(S.d1)} · desde las ${S.start} h</span></div><div class="d"><span class="small">Jornada 2</span><b>${esc(dlabel(S.d2))}</b><span class="small">${dd(S.d2)} · desde las ${S.start} h</span></div><div class="d"><span class="small">Gran final · Copa Fabio Iglesias</span><b>${esc(dlabel(S.dF))}</b><span class="small">${dd(S.dF)}</span></div></div></section>
   <div class="grid g4">
     <div class="card stat"><div class="v">${c.M}</div><div class="l">parejas de hombres</div></div>
     <div class="card stat"><div class="v">${c.F}</div><div class="l">parejas de mujeres</div></div>
@@ -979,8 +984,47 @@ function vPartidos(stage) {
     ${edit() && !screenMode ? '<p class="muted small adm" style="margin:8px 0 0">Anota los games de cada pareja y presiona Enter o Tab. Si hay empate, elige quién ganó el tie break.</p>' : ''}
     ${blocks.map(b => { const [a, e] = b.split('-').map(Number); return `<div class="block"><div class="block-h"><span class="t">${E.fmt(a)} – ${E.fmt(e)}</span></div><div class="mgrid">${list.filter(m => m.startMin === a && m.endMin === e).sort((x, y) => x.court - y.court).map(matchCard).join('')}</div></div>`; }).join('')}</div>`;
 }
-function vJ1() { return `<div class="row">${seg('j1sub', [['sorteo', 'Sorteo'], ['partidos', 'Partidos y resultados']], sub.j1)}</div>` + (sub.j1 === 'sorteo' ? vSorteo('J1') : vPartidos('J1')); }
-function vJ2() { return `<div class="row">${seg('j2sub', [['sorteo', 'Sorteo y bolilleros'], ['partidos', 'Partidos y resultados']], sub.j2)}</div>` + (sub.j2 === 'sorteo' ? vSorteo('J2') : vPartidos('J2')); }
+function ruleStrip(lines) { return REGLAS ? `<div class="note info" style="margin-bottom:12px"><div class="row sp" style="align-items:flex-start"><b>Reglas de la jornada</b><button class="btn sm" data-act="tab" data-v="reglas">Ver reglas completas</button></div><ul class="rules" style="margin-top:4px">${lines.map(l => `<li>${l}</li>`).join('')}</ul></div>` : ''; }
+const POS_TXT = 'Posiciones: partidos ganados, diferencia de games y, si persiste el empate, super tie break.';
+function vReglas() {
+  const S = state.settings, cu = cuposFor();
+  const time = m => `Si se acaba el tiempo (${m} minutos) se termina el juego en curso. Si queda una diferencia de un game, la pareja que ha sacado menos veces saca para empatar y luego se juega tie break. Si están empatados a los ${m} minutos, se define con tie break.`;
+  return `<div class="card"><h3>Reglas · Copa Fabio Iglesias 2026</h3><p class="muted small" style="margin:6px 0 0">Las jornadas 1 y 2 son la fase regional de la zona centro; la Copa se disputa en la gran final. Resumen de cómo se juega cada fase, en orden. Ante cualquier duda en cancha, decide la organización.</p></div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start">
+  <div class="card"><h3>Jornada 1</h3>
+    <h4 style="margin-top:12px">Fase de grupos</h4><ul class="rules">
+    <li>Grupos de hasta 4 parejas; todos contra todos.</li>
+    <li>Cada partido: <b>un set o ${S.dur1} minutos</b>, lo que ocurra primero.</li>
+    <li>${time(S.dur1)}</li></ul>
+    <h4 style="margin-top:14px">Posiciones</h4><ul class="rules">
+    <li><b>Dentro del grupo:</b> 1° partidos ganados, 2° diferencia de games (a favor menos en contra), 3° si sigue el empate, super tie break entre las parejas empatadas.</li>
+    <li><b>Ranking entre grupos</b> (para elegir a los mejores 3° y ordenar los bolilleros): porcentaje de partidos ganados y, luego, diferencia de games por partido, porque los grupos pueden tener distinto tamaño.</li></ul>
+    <h4 style="margin-top:14px">Quiénes pasan a la jornada 2</h4><ul class="rules">
+    <li>Clasifican el 1° y 2° de cada grupo (<b>${S.qM} hombres y ${S.qF} mujeres</b>), completando con los mejores 3° si faltan.</li></ul></div>
+  <div class="card"><h3>Jornada 2</h3>
+    <h4 style="margin-top:12px">Fase de grupos</h4><ul class="rules">
+    <li>Los clasificados se ordenan según su rendimiento en la jornada 1 y se reparten en <b>bolilleros</b>: cada grupo recibe una pareja de cada bolillero, por sorteo.</li>
+    <li>Hombres: ${S.nG2M} grupos de 4. Mujeres: ${S.nG2F} grupos de 4.</li>
+    ${S.avoidRematch ? '<li>En lo posible, no vuelven a coincidir parejas que estuvieron en el mismo grupo de la jornada 1.</li>' : ''}
+    <li>Cada partido: <b>un set o ${S.dur2} minutos</b>. ${time(S.dur2)}</li>
+    <li>Las posiciones se ordenan igual que en la jornada 1.</li></ul>
+    <h4 style="margin-top:14px">Llaves</h4><ul class="rules">
+    <li>Hombres: el 1° y 2° de cada grupo pasan a cuartos de final, luego semifinales, final y partido por el 3er lugar.</li>
+    <li>Mujeres: el 1° y 2° de cada grupo pasan a semifinales, luego final y partido por el 3er lugar.</li>
+    <li>Cada partido: <b>un set o ${S.durKO} minutos</b>. ${time(S.durKO)}</li>
+    <li>Desde esta fase los horarios se ajustan según la duración real de los partidos, procurando descansos similares entre parejas.</li></ul></div>
+  <div class="card"><h3>Gran final</h3>
+    <h4 style="margin-top:12px">Cupos</h4><ul class="rules">
+    <li>Se juega el <b>${esc(dlabel(S.dF).toLowerCase())}</b> y en ella se disputa la <b>Copa Fabio Iglesias</b>.</li>
+    <li>Hay <b>8 cupos por rama</b>, repartidos entre las zonas en proporción a las parejas inscritas en cada una. Zona centro tiene <b>${cu.M.Centro != null ? cu.M.Centro : '—'} cupos en hombres y ${cu.F.Centro != null ? cu.F.Centro : '—'} en mujeres</b>.</li>
+    <li>Clasifican las mejores parejas de la zona centro según su posición final en la jornada 2. El campeón de la zona es cabeza de serie en la gran final.</li></ul>
+    <h4 style="margin-top:14px">Cómo se juega</h4><ul class="rules">
+    <li>Fase de grupos: <b>un set o 30 minutos</b>, con la misma regla de tiempo y tie break.</li>
+    <li>Semifinales, final y partido por el 3er lugar: <b>a dos sets</b>. Si hay un set para cada pareja, se define con super tie break.</li></ul></div>
+  </div>`;
+}
+function vJ1() { return ruleStrip([`Se juega a un set o ${state.settings.dur1} minutos.`, POS_TXT, `Clasifican a la jornada 2 el 1° y 2° de cada grupo (${state.settings.qM} hombres y ${state.settings.qF} mujeres, completando con los mejores 3° si faltan).`]) + `<div class="row">${seg('j1sub', [['sorteo', 'Sorteo'], ['partidos', 'Partidos y resultados']], sub.j1)}</div>` + (sub.j1 === 'sorteo' ? vSorteo('J1') : vPartidos('J1')); }
+function vJ2() { return ruleStrip([`Grupos: se juega a un set o ${state.settings.dur2} minutos. ` + POS_TXT, `Clasifican a las llaves el 1° y 2° de cada grupo (cuartos de final en hombres, semifinales en mujeres).`, `Llaves: se juega a un set o ${state.settings.durKO} minutos.`]) + `<div class="row">${seg('j2sub', [['sorteo', 'Sorteo y bolilleros'], ['partidos', 'Partidos y resultados']], sub.j2)}</div>` + (sub.j2 === 'sorteo' ? vSorteo('J2') : vPartidos('J2')); }
 
 function vPos() {
   const which = sub.pos;
@@ -1035,7 +1079,7 @@ function vFinal() {
   const LM = finalList('M', nM), LF = finalList('F', nF), pm = LM.ids, pf = LF.ids;
   const zrows = cat => Object.keys(cu.z[cat]).map(z => `<tr><td>${z === 'Centro' ? '<b>Zona centro</b>' : esc(z)}</td><td class="n">${org() && !screenMode && z !== 'Centro' ? `<input type="number" min="0" style="width:70px;min-width:0" data-zone="${cat}:${z}" value="${cu.z[cat][z]}">` : cu.z[cat][z]}</td><td class="n num"><b style="font-size:22px">${cu[cat][z]}</b></td></tr>`).join('');
   const fin = (ids, n) => ids.length ? ids.map((id, i) => `<tr><td class="n"><b>${i + 1}</b></td><td>${esc(nameOf(id))}</td><td class="muted">${esc(tm()[id].p1)} / ${esc(tm()[id].p2)}</td></tr>`).join('') + Array.from({ length: Math.max(0, n - ids.length) }, (_, i) => `<tr><td class="n">${ids.length + i + 1}</td><td class="muted">por definir</td><td></td></tr>`).join('') : Array.from({ length: n }, (_, i) => `<tr><td class="n">${i + 1}</td><td class="muted">por definir</td><td></td></tr>`).join('');
-  return `<div class="card"><h3>Cupos a la gran final</h3><p class="muted small" style="margin:6px 0 0">Se reparten 8 cupos por rama, proporcional a las parejas inscritas en cada zona (método del mayor resto). Zona centro se actualiza sola con los inscritos activos.</p>
+  return `<div class="card"><h3>Cupos a la gran final</h3><p style="margin:6px 0 0">La gran final se juega el <b>${esc(dlabel(S.dF).toLowerCase())}</b> y en ella se disputa la <b>Copa Fabio Iglesias</b>. Las jornadas 1 y 2 son su fase regional.</p><p class="muted small" style="margin:6px 0 0">Se reparten 8 cupos por rama, proporcional a las parejas inscritas en cada zona (método del mayor resto). Zona centro se actualiza sola con los inscritos activos.</p>
     <div class="grid g2" style="margin-top:12px"><div><h4>Hombres</h4><div class="tbl-wrap"><table><thead><tr><th>Zona</th><th class="n">Inscritos</th><th class="n">Cupos</th></tr></thead><tbody>${zrows('M')}</tbody></table></div></div>
     <div><h4>Mujeres</h4><div class="tbl-wrap"><table><thead><tr><th>Zona</th><th class="n">Inscritos</th><th class="n">Cupos</th></tr></thead><tbody>${zrows('F')}</tbody></table></div></div></div></div>
   <div class="grid g2"><div class="card"><h3>Clasifican · hombres (${nM})</h3><div class="tbl-wrap"><table><tbody>${fin(pm, nM)}</tbody></table></div></div>
@@ -1058,7 +1102,7 @@ function vAjustes() {
   <div class="card"><h3>Reiniciar</h3><p class="muted small">Borra sorteos y resultados, y vuelve a la lista de inscritos original.</p>${confirmRedo === 'RESET' ? `<button class="btn gold" data-act="reset" data-force="1">Sí, borrar todo</button> <button class="btn" data-act="cancelRedo">Cancelar</button>` : `<button class="btn" data-act="reset">Reiniciar torneo</button>`}</div>`;
 }
 
-const VIEWS = { inicio: vInicio, inscritos: vInscritos, j1: vJ1, pos: vPos, j2: vJ2, llaves: vLlaves, final: vFinal, ajustes: vAjustes };
+const VIEWS = { inicio: vInicio, inscritos: vInscritos, j1: vJ1, pos: vPos, j2: vJ2, llaves: vLlaves, final: vFinal, reglas: vReglas, ajustes: vAjustes };
 
 function loginModal() {
   return `<div class="modal-bg"><form class="modal card" id="loginForm"><h3>Acceso</h3><p class="muted small">Solo para quien anota resultados u organiza. Los jugadores no necesitan entrar.</p>
@@ -1081,7 +1125,7 @@ function render() {
   else syncChip = syncMode === 'cloud' ? '<span class="chip ok">Guardado en la nube</span>' : '<span class="chip warn">Solo en este navegador</span>';
   const roleBox = !WEB ? '' : DEMO ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><a class="btn sm" href="?demo=${org() ? 'marcador' : 'org'}">Ver como ${org() ? 'marcador' : 'organización'}</a>` : (edit() ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><button class="btn sm" data-act="logout">Salir</button>` : (fb ? '<button class="btn sm ghost" data-act="login">Acceso organización</button>' : ''));
   document.body.classList.toggle('screen', screenMode);
-  $('#app').innerHTML = `<div class="top"><div class="top-in"><div class="brand"><div class="plate"><img src="${LOGO}" alt="FPY Empresas"></div><div class="title">Copa Zona Centro<small>Pádel por parejas · 2026</small></div></div>
+  $('#app').innerHTML = `<div class="top"><div class="top-in"><div class="brand"><div class="plate"><img src="${LOGO}" alt="FPY Empresas"></div><div class="title">Copa Fabio Iglesias<small>Fase regional · Zona Centro · 2026</small></div></div>
     <div class="top-r">${syncChip}${roleBox}${!org() ? '' : `<button class="btn sm" data-act="screen">${screenMode ? 'Salir de modo pantalla' : 'Modo pantalla'}</button>`}</div></div>
     <nav class="nav" aria-label="Secciones">${tabs().map(([k, l]) => `<button data-act="tab" data-v="${k}" ${tab === k ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav></div>
     <main>${notice ? noteBox('info', esc(notice)) : ''}${(tabs().some(t => t[0] === tab) ? VIEWS[tab] : vInicio)()}</main>${loginOpen ? loginModal() : ''}
@@ -1178,7 +1222,24 @@ function importFile(file) {
   rd.readAsArrayBuffer(file);
 }
 
+/* al tocar el nombre de una pareja (celular) o hacer clic (computador) se muestran sus jugadores */
+let popTimer = null;
+function hidePop() { clearTimeout(popTimer); document.querySelectorAll('.tpop').forEach(x => x.remove()); }
+function showPop(el) {
+  const id = el.dataset.team, same = document.querySelector('.tpop[data-team="' + id + '"]'); hidePop(); if (same) return;
+  const t = tm()[id]; if (!t) return;
+  const d = document.createElement('div'); d.className = 'tpop'; d.dataset.team = id;
+  d.innerHTML = '<b>' + esc(t.name) + '</b><br>' + esc(t.p1) + '<br>' + esc(t.p2);
+  document.body.appendChild(d);
+  const r = el.getBoundingClientRect(), w = d.offsetWidth, h = d.offsetHeight;
+  let x = Math.min(Math.max(8, r.left), window.innerWidth - w - 8), y = r.bottom + 6; if (y + h > window.innerHeight - 8) y = Math.max(8, r.top - h - 6);
+  d.style.left = x + 'px'; d.style.top = y + 'px';
+  popTimer = setTimeout(hidePop, 6000);
+}
+window.addEventListener('scroll', hidePop, { passive: true });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') hidePop(); else if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList && ev.target.classList.contains('tl')) { ev.preventDefault(); showPop(ev.target); } });
 document.addEventListener('click', async ev => {
+  const tl = ev.target.closest('.tl'); if (tl) { showPop(tl); return; } if (!ev.target.closest('.tpop')) hidePop();
   const b = ev.target.closest('[data-act]'); if (!b) return;
   const a = b.dataset.act, v = b.dataset.v;
   if (a === 'tab') { tab = v; notice = ''; filt.group = 'all'; render(); window.scrollTo(0, 0); return; }

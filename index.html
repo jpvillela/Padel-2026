@@ -343,15 +343,27 @@ main > * { min-width: 0; max-width: 100%; }
       }
     }
     gs.sort((a, b) => a.pr - b.pr || a.cat.localeCompare(b.cat) || String(a.group).localeCompare(String(b.group)));
-    // primer bloque: temprano y, si hay lugar, neutrales; después los «tarde» (no juegan en el primer bloque); luego el resto
-    const first = []; let u = 0; const rest = [];
-    gs.filter(g => g.pr < 2).forEach(g => { if (u + g.need <= nC) { first.push(g); u += g.need; } else rest.push(g); });
-    gs.splice(0, gs.length, ...first, ...gs.filter(g => g.pr === 2), ...rest);
-    const blocks = []; let cur = null;
-    gs.forEach(g => {
-      if (!cur || cur.used + g.need > nC) { cur = { used: 0, gs: [], pr: g.pr }; blocks.push(cur); }
-      cur.gs.push({ g, c0: cur.used }); cur.used += g.need;
-    });
+    // bloques de una hora: en cada uno, un grupo de mujeres y los demás de hombres (igual visibilidad a ambas ramas).
+    // El primer bloque lleva a los grupos «temprano»; los «tarde» quedan para el segundo bloque en adelante.
+    const order = Object.fromEntries(gs.map((g, i) => [g.key, i])), rem = gs.slice(), blocks = [];
+    for (let b = 0; rem.length; b++) {
+      const pool = rem.filter(g => b > 0 || g.pr < 2).sort((x, y) => {
+        const kx = b === 0 ? x.pr : (x.pr === 2 ? 0 : x.pr === 0 ? 1 : 2), ky = b === 0 ? y.pr : (y.pr === 2 ? 0 : y.pr === 0 ? 1 : 2);
+        return kx - ky || order[x.key] - order[y.key];
+      });
+      const chosen = []; let used = 0;
+      const fits = g => used + g.need <= nC && !chosen.includes(g);
+      const add = g => { chosen.push(g); used += g.need; rem.splice(rem.indexOf(g), 1); };
+      const hasF = () => chosen.some(g => g.cat === 'F');
+      pool.forEach(g => { if ((b === 0 ? g.pr === 0 : g.pr === 2) && fits(g) && !(g.cat === 'F' && hasF())) add(g); });
+      if (!hasF()) { const f = pool.find(g => g.cat === 'F' && fits(g)); if (f) add(f); }
+      pool.forEach(g => { if (g.cat !== 'F' && fits(g)) add(g); });
+      pool.forEach(g => { if (fits(g)) add(g); });
+      if (!chosen.length) { const g = rem.shift(); chosen.push(g); used = g.need; }
+      const f = chosen.find(g => g.cat === 'F'), ms = chosen.filter(g => g !== f);
+      blocks.push({ used: 0, gs: (f && ms.length ? [ms[0], f, ...ms.slice(1)] : chosen).map(g => ({ g, c0: 0 })) });
+    }
+    blocks.forEach(b => { let c = 0; b.gs.forEach(x => { x.c0 = c; c += x.g.need; }); });
     const res = []; let slot = 0;
     blocks.forEach(b => {
       b.gs.forEach(({ g, c0 }) => {

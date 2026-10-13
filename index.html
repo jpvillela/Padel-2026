@@ -183,6 +183,10 @@ main > * { min-width: 0; max-width: 100%; }
 .hero .venue b { display: block; font-family: var(--f-display); font-size: 22px; letter-spacing: .02em; line-height: 1.1; }
 .hero .venue .go { margin-left: auto; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 
+/* acceso de organización: arriba en computador; en celular, discreto al final de la página */
+.login-foot { display: none; background: none; border: 0; color: var(--muted); font: inherit; font-size: 12px; opacity: .65; text-decoration: underline; padding: 10px; margin-top: 6px; cursor: pointer; }
+@media (max-width: 700px) { .login-top { display: none; } .login-foot { display: inline-block; } }
+
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:60;padding:16px}.modal{width:min(380px,100%);display:grid;gap:12px}.btn.ghost{background:transparent}</style></head><body><div id="app"></div><script src="config.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script>/* Motor del torneo — Copa Fabio Iglesias, fase regional zona centro. Funciona en node y en el navegador. */
 (function (root) {
   const E = {};
@@ -1374,13 +1378,14 @@ function render() {
   else if (WEB && edit()) syncChip = pubState === 'pending' ? '<span class="chip warn">Publicando…</span>' : (pubState === 'err' && /PERMISSION/i.test(pubErr) ? '<span class="chip bad">Sin permiso para publicar: avisa a la organización</span>' : (pubState === 'err' || !online ? '<button class="btn sm gold" data-act="pubnow">Sin conexión · Publicar ahora</button>' + (online && pubErr ? '<span class="chip bad" style="margin-left:6px;max-width:340px;white-space:normal">Detalle: ' + esc(pubErr).slice(0, 120) + '</span>' : '') : `<span class="chip ok">Publicado${lastPub ? ' ' + hhmm(lastPub) : ''}</span>`));
   else if (PUBLIC || WEB) syncChip = `<span class="chip">${updatedAt ? 'Actualizado ' + updatedAt : 'Cargando…'}</span>`;
   else syncChip = syncMode === 'cloud' ? '<span class="chip ok">Guardado en la nube</span>' : '<span class="chip warn">Solo en este navegador</span>';
-  const roleBox = !WEB ? '' : DEMO ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><a class="btn sm" href="?demo=${org() ? 'marcador' : 'org'}">Ver como ${org() ? 'marcador' : 'organización'}</a>` : (edit() ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><button class="btn sm" data-act="logout">Salir</button>` : (fb ? '<button class="btn sm ghost" data-act="login">Acceso organización</button>' : ''));
+  const roleBox = !WEB ? '' : DEMO ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><a class="btn sm" href="?demo=${org() ? 'marcador' : 'org'}">Ver como ${org() ? 'marcador' : 'organización'}</a>` : (edit() ? `<span class="chip gold">${org() ? 'Organización' : 'Marcador'}</span><button class="btn sm" data-act="logout">Salir</button>` : (fb ? '<button class="btn sm ghost login-top" data-act="login">Acceso organización</button>' : ''));
+  const loginFoot = (WEB && !DEMO && !edit() && fb) ? '<button class="login-foot" data-act="login">Acceso organización</button>' : '';
   document.body.classList.toggle('screen', screenMode);
   $('#app').innerHTML = `<div class="top"><div class="top-in"><div class="brand"><div class="plate"><img src="${LOGO}" alt="FPY Empresas"></div><div class="title">Copa Fabio Iglesias<small>Fase regional · Zona Centro · 2026</small></div></div>
     <div class="top-r">${syncChip}${roleBox}${!org() ? '' : `<button class="btn sm" data-act="screen">${screenMode ? 'Salir de modo pantalla' : 'Modo pantalla'}</button>`}</div></div>
     <nav class="nav" aria-label="Secciones">${tabs().map(([k, l]) => `<button data-act="tab" data-v="${k}" ${tab === k ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav></div>
     <main>${notice ? noteBox('info', esc(notice)) : ''}${(tabs().some(t => t[0] === tab) ? VIEWS[tab] : vInicio)()}</main>${loginOpen ? loginModal() : ''}
-    <div class="foot"><div class="plate"><img src="${STRIP}" alt="Inmobiliaria PY, Inmobiliaria Proyección, Constructora Carrán, Maquinaria Carrán"></div><span class="muted small">Empresas FPY · Constructora Carrán</span></div>`;
+    <div class="foot"><div class="plate"><img src="${STRIP}" alt="Inmobiliaria PY, Inmobiliaria Proyección, Constructora Carrán, Maquinaria Carrán"></div><span class="muted small">Empresas FPY · Constructora Carrán</span>${loginFoot}</div>`;
   window.scrollTo(0, sy);
   if (focusK) { const el = document.querySelector(`[data-k="${focusK}"]`); if (el) { el.focus(); try { el.select(); } catch (e) {} } }
 }

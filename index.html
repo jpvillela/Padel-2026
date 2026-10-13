@@ -177,6 +177,12 @@ body.screen { font-size: 17px; }
 .seg { max-width: 100%; overflow-x: auto; }
 main > * { min-width: 0; max-width: 100%; }
 
+.hero .venue { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: relative; z-index: 1; color: #fff; text-decoration: none; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.3); padding: 10px 14px; border-radius: 10px; width: fit-content; max-width: 100%; }
+.hero .venue:hover, .hero .venue:focus-visible { background: rgba(255,255,255,.24); }
+.hero .venue svg { color: #D6B070; flex: none; }
+.hero .venue b { display: block; font-family: var(--f-display); font-size: 22px; letter-spacing: .02em; line-height: 1.1; }
+.hero .venue .go { margin-left: auto; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:60;padding:16px}.modal{width:min(380px,100%);display:grid;gap:12px}.btn.ghost{background:transparent}</style></head><body><div id="app"></div><script src="config.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script>/* Motor del torneo — Copa Fabio Iglesias, fase regional zona centro. Funciona en node y en el navegador. */
 (function (root) {
   const E = {};
@@ -1071,7 +1077,8 @@ function vInicio() {
   const todayStage = todayISO() === S.dF && state.gf ? 'GF' : todayISO() === S.d2 ? 'J2' : 'J1';
   return `<img class="banner" alt="Torneo de pádel · Copa Fabio Iglesias 2026" src="${POSTER}">
   <section class="hero"><div style="position:relative;z-index:1"><span class="chip gold">Fase regional · Zona centro · V, RM y VI región</span></div>
-    <div class="dates"><div class="d"><span class="small">Jornada 1</span><b>${esc(dlabel(S.d1))}</b><span class="small">${dd(S.d1)} · desde las ${S.start} h</span></div><div class="d"><span class="small">Jornada 2</span><b>${esc(dlabel(S.d2))}</b><span class="small">${dd(S.d2)} · desde las ${S.start} h</span></div><div class="d"><span class="small">Gran final · Copa Fabio Iglesias</span><b>${esc(dlabel(S.dF))}</b><span class="small">${dd(S.dF)}</span></div></div></section>
+    <div class="dates"><div class="d"><span class="small">Jornada 1</span><b>${esc(dlabel(S.d1))}</b><span class="small">${dd(S.d1)} · desde las ${S.start} h</span></div><div class="d"><span class="small">Jornada 2</span><b>${esc(dlabel(S.d2))}</b><span class="small">${dd(S.d2)} · desde las ${S.start} h</span></div><div class="d"><span class="small">Gran final · Copa Fabio Iglesias</span><b>${esc(dlabel(S.dF))}</b><span class="small">${dd(S.dF)}</span></div></div>
+    <a class="venue" href="https://maps.app.goo.gl/jXEPewYR3Y79M46A9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.500a2.500 2.500 0 0 1 0 5z"/></svg><span><span class="small">Sede de todo el torneo</span><b>Padel Plus</b></span><span class="go">Ver ubicación ›</span></a></section>
   <div class="grid g4">
     <div class="card stat"><div class="v">${c.M}</div><div class="l">parejas de hombres</div></div>
     <div class="card stat"><div class="v">${c.F}</div><div class="l">parejas de mujeres</div></div>

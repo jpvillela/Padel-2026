@@ -291,11 +291,76 @@ main > * { min-width: 0; max-width: 100%; }
     return out;
   };
 
+  /* programación por bloques (criterio 2025, jornada 1): cada grupo juega todos sus partidos seguidos.
+     Un grupo de 4 ocupa 2 canchas durante 3 rondas seguidas; con 6 canchas juegan 3 grupos a la vez.
+     Los grupos con una pareja «temprano» van en el primer bloque; los que tienen una «tarde» van en los últimos. */
+  E.scheduleBlocks = function (matches, o) {
+    const nC = o.nCourts || 6, early = new Set(o.early || []), late = new Set(o.late || []);
+    const G = {}; matches.forEach(m => { const k = m.cat + '|' + m.group; (G[k] = G[k] || { key: k, cat: m.cat, group: m.group, ms: [] }).ms.push(m); });
+    const gs = Object.values(G);
+    gs.forEach(g => {
+      const ids = new Set(); g.ms.forEach(m => { ids.add(m.a); ids.add(m.b); });
+      g.pr = [...ids].some(i => early.has(i)) ? 0 : [...ids].some(i => late.has(i)) ? 2 : 1;
+      g.need = Math.min(nC, Math.max(...Object.values(g.ms.reduce((a, m) => (a[m.round] = (a[m.round] || 0) + 1, a), {}))));
+      g.rounds = Math.max(...g.ms.map(m => m.round));
+    });
+    if (o.pairs && o.pairs.length) { // jornada 2: se busca el reparto en bloques que deje parejas con descanso parecido antes de las llaves
+      const base = gs.slice().sort((x, y) => y.cat.localeCompare(x.cat) || String(x.group).localeCompare(String(y.group)));
+      const tot = base.reduce((s, g) => s + g.need, 0), B = Math.max(1, Math.ceil(tot / nC)), idx = Object.fromEntries(base.map((g, i) => [g.key, i]));
+      let best = null; const asg = new Array(base.length).fill(0), load = new Array(B).fill(0);
+      const rec = i => {
+        if (i === base.length) {
+          let c = 0; o.pairs.forEach(p => { if (idx[p[0]] != null && idx[p[1]] != null) c += (p[2] || 1) * Math.abs(asg[idx[p[0]]] - asg[idx[p[1]]]); });
+          base.forEach((g, k) => { if (B > 1) { if (g.pr === 0 && asg[k] !== 0) c += 1000; if (g.pr === 2 && asg[k] === 0) c += 1000; } });
+          if (!best || c < best.c - 1e-9) best = { c, asg: asg.slice() };
+          return;
+        }
+        for (let b = 0; b < B; b++) if (load[b] + base[i].need <= nC) { load[b] += base[i].need; asg[i] = b; rec(i + 1); load[b] -= base[i].need; }
+      };
+      rec(0);
+      if (best) {
+        const bl = Array.from({ length: B }, () => ({ used: 0, gs: [] }));
+        base.forEach((g, k) => { const b = bl[best.asg[k]]; b.gs.push({ g, c0: b.used }); b.used += g.need; });
+        const res = []; let slot = 0;
+        bl.forEach(b => {
+          b.gs.forEach(({ g, c0 }) => {
+            const byR = {}; g.ms.forEach(m => (byR[m.round] = byR[m.round] || []).push(m));
+            Object.keys(byR).forEach(r => byR[r].forEach((m, k) => res.push({ id: m.id, slot: slot + (+r - 1), court: c0 + k + 1 })));
+          });
+          if (b.gs.length) slot += Math.max(...b.gs.map(x => x.g.rounds));
+        });
+        return { slots: slot, b2b: 0, res, cost: slot * 1000, blocks: best.asg };
+      }
+    }
+    gs.sort((a, b) => a.pr - b.pr || a.cat.localeCompare(b.cat) || String(a.group).localeCompare(String(b.group)));
+    // primer bloque: temprano y, si hay lugar, neutrales; después los «tarde» (no juegan en el primer bloque); luego el resto
+    const first = []; let u = 0; const rest = [];
+    gs.filter(g => g.pr < 2).forEach(g => { if (u + g.need <= nC) { first.push(g); u += g.need; } else rest.push(g); });
+    gs.splice(0, gs.length, ...first, ...gs.filter(g => g.pr === 2), ...rest);
+    const blocks = []; let cur = null;
+    gs.forEach(g => {
+      if (!cur || cur.used + g.need > nC) { cur = { used: 0, gs: [], pr: g.pr }; blocks.push(cur); }
+      cur.gs.push({ g, c0: cur.used }); cur.used += g.need;
+    });
+    const res = []; let slot = 0;
+    blocks.forEach(b => {
+      b.gs.forEach(({ g, c0 }) => {
+        const byR = {}; g.ms.forEach(m => (byR[m.round] = byR[m.round] || []).push(m));
+        Object.keys(byR).forEach(r => byR[r].forEach((m, k) => res.push({ id: m.id, slot: slot + (+r - 1), court: c0 + k + 1 })));
+      });
+      slot += Math.max(...b.gs.map(x => x.g.rounds));
+    });
+    return { slots: slot, b2b: 0, res, cost: slot * 1000 };
+  };
+
   /* ---------- programación en canchas ---------- */
   /* asigna slot (bloque de `dur` minutos) y cancha. Minimiza descansos nulos. */
   E.schedule = function (matches, o) {
     const nC = o.nCourts || 6, iters = o.iters || 400;
+    const early = new Set(o.early || []), late = new Set(o.late || []), lateMin = o.lateMin == null ? 2 : o.lateMin;
+    const isE = m => early.has(m.a) || early.has(m.b), isL = m => late.has(m.a) || late.has(m.b);
     const rnd = E.rng((o.seed || 'x') + '|sched');
+    const isEid = {}; matches.forEach(m => { if (isE(m)) isEid[m.id] = 1; });
     let best = null;
     for (let it = 0; it < iters; it++) {
       const rem = matches.slice(), last = {}, res = [];
@@ -305,11 +370,12 @@ main > * { min-width: 0; max-width: 100%; }
           m,
           pen: ((last[m.a] === slot - 1) ? 1 : 0) + ((last[m.b] === slot - 1) ? 1 : 0)
         }));
-        cands.sort((x, y) => (x.pen - y.pen) || (x.m.round - y.m.round));
+        cands.sort((x, y) => (x.pen - y.pen) || ((isE(y.m) ? 1 : 0) - (isE(x.m) ? 1 : 0)) || (x.m.round - y.m.round));
         const used = new Set(), pick = [];
         for (const c of cands) {
           if (pick.length >= nC) break;
           if (used.has(c.m.a) || used.has(c.m.b)) continue;
+          if (slot < lateMin && isL(c.m) && !isE(c.m)) continue; // quienes llegan de lejos no juegan en las primeras rondas
           if (c.pen && it % 2 === 1 && rnd() < 0.35) continue;
           pick.push(c); used.add(c.m.a); used.add(c.m.b);
         }
@@ -321,7 +387,8 @@ main > * { min-width: 0; max-width: 100%; }
         });
         slot++;
       }
-      const cost = slot * 1000 + b2b * 10;
+      let eSum = 0; res.forEach(r => { if (isEid[r.id]) eSum += r.slot; });
+      const cost = slot * 1000 + b2b * 10 + eSum;
       if (!best || cost < best.cost) best = { cost, slots: slot, b2b, res };
     }
     return best;
@@ -500,7 +567,7 @@ main > * { min-width: 0; max-width: 100%; }
       groups[cat] = d.groups; steps[cat] = d.steps; attempts[cat] = d.attempts;
       d.groups.forEach(g => matches.push(...E.groupMatches('J1', cat, g, S.dur1)));
     });
-    const sch = E.schedule(matches, { nCourts: S.nCourts, seed: S.seed, iters: 500 });
+    const sch = E.scheduleBlocks(matches, { nCourts: S.nCourts, early: st.teams.filter(t => t.hor === 'early').map(t => t.id), late: st.teams.filter(t => t.hor === 'late').map(t => t.id) });
     const t0 = E.toMin(S.start), pos = Object.fromEntries(sch.res.map(r => [r.id, r]));
     matches.forEach(m => { const r = pos[m.id]; m.slot = r.slot; m.court = r.court; m.startMin = t0 + r.slot * S.dur1; m.endMin = m.startMin + S.dur1; });
     matches.sort((a, b) => a.startMin - b.startMin || a.court - b.court);
@@ -580,7 +647,8 @@ main > * { min-width: 0; max-width: 100%; }
       groups[cat] = d.groups; steps[cat] = d.steps; info[cat] = { buckets: d.buckets, rematch: d.rematch, attempts: d.attempts, origin: Object.fromEntries(q.map(r => [r.id, r.group])) };
       d.groups.forEach(g => matches.push(...E.groupMatches('J2', cat, g, S.dur2)));
     });
-    const sch = E.schedule(matches, { nCourts: S.nCourts, seed: S.seed + '|2', iters: 500 });
+    const pairs = []; ['M', 'F'].forEach(cat => { const n = groups[cat].length, gid = i => cat + '|' + E.groupId(cat, i); for (let i = 0; i + 1 < n; i += 2) pairs.push([gid(i), gid(i + 1), cat === 'M' ? 1.01 : 1]); });
+    const sch = E.scheduleBlocks(matches, { nCourts: S.nCourts, pairs, early: st.teams.filter(t => t.hor === 'early').map(t => t.id), late: st.teams.filter(t => t.hor === 'late').map(t => t.id) });
     const t0 = E.toMin(S.start), pos = Object.fromEntries(sch.res.map(r => [r.id, r]));
     matches.forEach(m => { const r = pos[m.id]; m.slot = r.slot; m.court = r.court; m.startMin = t0 + r.slot * S.dur2; m.endMin = m.startMin + S.dur2; });
     const groupsEnd = t0 + sch.slots * S.dur2;
@@ -1044,13 +1112,14 @@ function vInscritos() {
   const rows = list.map(t => `<tr class="${t.out ? 'out' : ''}"><td>${rama(t.cat)}</td><td>${canEdit ? `<input type="text" data-f="name" data-t="${t.id}" value="${esc(t.name)}">` : esc(t.name)}</td>
     <td>${canEdit ? `<input type="text" data-f="p1" data-t="${t.id}" value="${esc(t.p1)}">` : esc(t.p1)}</td><td>${canEdit ? `<input type="text" data-f="p2" data-t="${t.id}" value="${esc(t.p2)}">` : esc(t.p2)}</td>
     <td class="n">${canEdit ? `<input type="number" min="0" max="40" style="width:64px;min-width:0" data-f="seed" data-t="${t.id}" value="${t.seed || ''}">` : (t.seed ? '★ ' + t.seed : '')}</td>
+    ${canEdit ? `<td><select data-f="hor" data-t="${t.id}" style="min-width:0"><option value="">Normal</option><option value="early"${t.hor === 'early' ? ' selected' : ''}>Temprano</option><option value="late"${t.hor === 'late' ? ' selected' : ''}>Tarde</option></select></td>` : ''}
     <td class="adm">${canEdit ? `<button class="btn sm" data-act="out" data-t="${t.id}">${t.out ? 'Reincorporar' : 'Retirar'}</button>` : ''}</td></tr>`).join('');
   return `<div class="card"><div class="row sp"><h3>Parejas inscritas · zona centro</h3><div class="row"><span class="chip">${counts().M} hombres</span><span class="chip gold">${counts().F} mujeres</span></div></div>
     ${val.length ? `<div class="grid" style="margin-top:12px">${val.map(x => noteBox(x.level === 'error' ? 'bad' : x.level === 'warn' ? '' : 'info', esc(x.msg))).join('')}</div>` : ''}
     <div class="row" style="margin-top:12px"><input class="fld" id="q" placeholder="Buscar pareja o jugador" value="${esc(filt.q || '')}" style="max-width:280px">${seg('rama', [['all', 'Todas'], ['M', 'Hombres'], ['F', 'Mujeres']], filt.rama)}
     ${canEdit ? `<span class="adm row"><label class="btn">Importar archivo del formulario<input id="imp" type="file" accept=".xlsx" hidden></label><button class="btn" data-act="addTeam">Agregar pareja</button></span>` : ''}</div>
     ${canEdit && state.j1 ? noteBox('info', 'El sorteo de la jornada 1 ya está hecho: puedes editar nombres o retirar parejas, pero importar una lista nueva requiere rehacer el sorteo.') : ''}
-    <div class="tbl-wrap" style="margin-top:12px"><table><thead><tr><th>Rama</th><th>Pareja</th><th>Jugador 1</th><th>Jugador 2</th><th class="n">Serie</th><th class="adm"></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="tbl-wrap" style="margin-top:12px"><table><thead><tr><th>Rama</th><th>Pareja</th><th>Jugador 1</th><th>Jugador 2</th><th class="n">Serie</th>${canEdit ? '<th title="Temprano: su grupo juega en el primer bloque (primeras 3 rondas seguidas). Tarde: su grupo juega en el segundo bloque, no en el primero. Marcarlo antes del sorteo.">Horario</th>' : ''}<th class="adm"></th></tr></thead><tbody>${rows}</tbody></table></div>
     ${canEdit ? '<p class="muted small">Serie: 1 es la mejor pareja. Con 8 grupos, las series 1 a 8 quedan una por grupo. Déjalo vacío para quien no es cabeza de serie.</p>' : ''}</div>`;
 }
 
@@ -1420,7 +1489,7 @@ function importFile(file) {
       const seen = new Set(), uniq = all.filter(t => { const k = t.cat + E.norm(t.p1) + E.norm(t.p2); const kk = E.norm(t.p1) + '|' + E.norm(t.p2); if (seen.has(kk)) return false; seen.add(kk); return true; });
       uniq.forEach(t => { if (t.zone !== 'Centro') zones[t.cat][t.zone] = (zones[t.cat][t.zone] || 0) + 1; });
       const old = Object.fromEntries(state.teams.map(t => [t.id, t]));
-      const central = uniq.filter(t => t.zone === 'Centro').map(t => Object.assign({ seed: 0 }, t, old[t.id] ? { seed: t.seed || old[t.id].seed || 0, out: old[t.id].out } : {}));
+      const central = uniq.filter(t => t.zone === 'Centro').map(t => Object.assign({ seed: 0 }, t, old[t.id] ? { seed: t.seed || old[t.id].seed || 0, out: old[t.id].out, hor: old[t.id].hor } : {}));
       if (state.j1) { toast('Ya hay sorteo: rehaz el sorteo antes de importar'); return; }
       state.teams = central; state.zones = { M: Object.assign({ Centro: 0 }, zones.M), F: Object.assign({ Centro: 0 }, zones.F) };
       save(); notice = `Lista importada: ${central.filter(t => t.cat === 'M').length} parejas de hombres y ${central.filter(t => t.cat === 'F').length} de mujeres en zona centro.`; render();

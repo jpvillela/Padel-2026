@@ -493,7 +493,7 @@ main > * { min-width: 0; max-width: 100%; }
       if (pos <= 2) lvl.forEach(r => take.push(r));
       else lvl.slice(0, need).forEach(r => take.push(r));
     }
-    take.sort((x, y) => x.rank - y.rank);
+    take.sort((x, y) => (x.pos - y.pos) || (x.rank - y.rank)); // primeros de grupo primero (cabezas de serie), luego segundos, luego terceros
     return take.slice(0, Q);
   };
 
@@ -1169,7 +1169,7 @@ function vSorteo(stage) {
       ${s ? `<p class="small muted" style="margin-bottom:0">Semilla usada: <b>${esc(s.seed)}</b> · ${esc(shortDate(S.dF))}</p>` : ''}</div>`;
   } else {
     const ready = E.j1Complete(state);
-    top = `<div class="card"><div class="row sp"><div><h3>Sorteo por bolilleros · jornada 2</h3><p class="muted small" style="margin:6px 0 0">Los clasificados se ordenan por rendimiento en la jornada 1 y se reparten en bolilleros: cada grupo recibe una pareja de cada bolillero.</p></div>
+    top = `<div class="card"><div class="row sp"><div><h3>Sorteo por bolilleros · jornada 2</h3><p class="muted small" style="margin:6px 0 0">Los clasificados se ordenan así: primero los primeros de cada grupo (son los cabezas de serie), luego los segundos y después los mejores terceros; dentro de cada nivel, por rendimiento en la jornada 1. Se reparten en bolilleros: cada grupo recibe una pareja de cada bolillero.</p></div>
       ${canEdit ? `<div class="row adm">${confirmRedo === 'J2' ? `<button class="btn gold" data-act="draw2" data-force="1">Sí, rehacer jornada 2</button><button class="btn" data-act="cancelRedo">Cancelar</button>` : `<button class="btn pri" data-act="draw2" ${ready ? '' : 'disabled'}>${s ? 'Rehacer sorteo' : 'Armar jornada 2'}</button>`}</div>` : ''}</div>
       ${!state.j1 ? noteBox('', 'Primero se realiza el sorteo de la jornada 1.') : (ready ? '' : noteBox('', `Faltan ${progress('J1').total - progress('J1').done} resultados de la jornada 1 para poder armar la jornada 2.`))}
       ${s && s.info ? Object.entries(s.info).map(([cat, i]) => i.rematch ? noteBox('', `${rama(cat)}: no fue posible evitar que se repitan cruces de la jornada 1 en algún grupo.`) : '').join('') : ''}
@@ -1214,12 +1214,12 @@ function vReglas() {
     <li>${time(S.dur1)}</li></ul>
     <h4 style="margin-top:14px">Posiciones</h4><ul class="rules">
     <li><b>Dentro del grupo:</b> 1° partidos ganados, 2° diferencia de games (a favor menos en contra), 3° si sigue el empate, super tie break entre las parejas empatadas.</li>
-    <li><b>Ranking entre grupos</b> (para elegir a los mejores 3° y ordenar los bolilleros): porcentaje de partidos ganados y, luego, diferencia de games por partido, porque los grupos pueden tener distinto tamaño.</li></ul>
+    <li><b>Ranking entre grupos</b> (para elegir a los mejores 3° y ordenar los bolilleros): porcentaje de partidos ganados y, luego, diferencia de games por partido. Para armar los bolilleros de la jornada 2, los primeros de cada grupo van siempre antes que los segundos.</li></ul>
     <h4 style="margin-top:14px">Quiénes pasan a la jornada 2</h4><ul class="rules">
     <li>Clasifican el 1° y 2° de cada grupo (<b>${S.qM} hombres y ${S.qF} mujeres</b>), completando con los mejores 3° si faltan.</li></ul></div>
   <div class="card"><h3>Jornada 2</h3>
     <h4 style="margin-top:12px">Fase de grupos</h4><ul class="rules">
-    <li>Los clasificados se ordenan según su rendimiento en la jornada 1 y se reparten en <b>bolilleros</b>: cada grupo recibe una pareja de cada bolillero, por sorteo.</li>
+    <li>Los clasificados se ordenan con los primeros de cada grupo como cabezas de serie, luego los segundos y los mejores terceros (dentro de cada nivel, por rendimiento en la jornada 1) y se reparten en <b>bolilleros</b>: cada grupo recibe una pareja de cada bolillero, por sorteo.</li>
     <li>Hombres: ${S.nG2M} grupos de 4. Mujeres: ${S.nG2F} grupos de 4.</li>
     ${S.avoidRematch ? '<li>En lo posible, no vuelven a coincidir parejas que estuvieron en el mismo grupo de la jornada 1.</li>' : ''}
     <li>Cada partido: <b>un set o ${S.dur2} minutos</b>. ${time(S.dur2)}</li>

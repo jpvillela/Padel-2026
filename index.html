@@ -692,6 +692,36 @@ main > * { min-width: 0; max-width: 100%; }
     return st;
   };
 
+  /* jornada 2: reemplazo de una pareja que se baja (sin volver a sortear). La pareja nueva toma el mismo grupo, bolillero y partidos. */
+  E.j2Candidates = function (st, cat) {
+    if (!st.j2 || !E.j1Complete(st)) return [];
+    const inJ2 = new Set((st.j2.groups[cat] || []).flatMap(g => g.teams)), outs = new Set((st.j2.subs || []).filter(s => s.cat === cat).map(s => s.out));
+    return E.j1Ranking(st)[cat].ranked.filter(r => !inJ2.has(r.id) && !outs.has(r.id)).map(r => ({ id: r.id, rank: r.rank, group: r.group, pos: r.pos }));
+  };
+  E.replaceJ2 = function (st, outId, inId) {
+    const j2 = st.j2; if (!j2) return { error: 'Primero hay que armar la jornada 2.' };
+    const tm = E.teamMap(st), o = tm[outId], n = tm[inId]; if (!o || !n) return { error: 'No encuentro la pareja.' };
+    const cat = o.cat; if (n.cat !== cat) return { error: 'La pareja que reemplaza debe ser de la misma rama.' };
+    const g = (j2.groups[cat] || []).find(x => x.teams.includes(outId)); if (!g) return { error: 'La pareja que se baja no está en la jornada 2.' };
+    if ((j2.groups[cat] || []).some(x => x.teams.includes(inId))) return { error: 'La pareja que entra ya está en la jornada 2.' };
+    const ms = j2.matches.filter(m => m.phase === 'grupos' && (m.a === outId || m.b === outId));
+    if (ms.some(m => st.results[m.id])) return { error: 'La pareja que se baja ya tiene partidos jugados en la jornada 2.' };
+    g.teams = g.teams.map(id => id === outId ? inId : id);
+    ms.forEach(m => { if (m.a === outId) m.a = inId; if (m.b === outId) m.b = inId; });
+    const info = j2.info && j2.info[cat];
+    if (info) {
+      info.buckets = info.buckets.map(b => b.map(id => id === outId ? inId : id));
+      const g1 = st.j1 && st.j1.groups[cat].find(x => x.teams.includes(inId)); if (g1) info.origin[inId] = g1.id;
+    }
+    j2.subs = (j2.subs || []).concat([{ cat, out: outId, in: inId, group: g.id, at: new Date().toISOString() }]);
+    const warns = [];
+    if (info && g.teams.some(id => id !== inId && info.origin[id] && info.origin[id] === info.origin[inId])) warns.push('En su nuevo grupo hay una pareja con la que ya jugó en la jornada 1.');
+    const all = j2.matches.filter(m => m.phase === 'grupos').map(m => m.startMin), first = Math.min(...all), mine = ms.map(m => m.startMin);
+    if (n.hor === 'late' && Math.min(...mine) === first) warns.push('Tiene la marca «Tarde» y su grupo juega en el primer bloque.');
+    if (n.hor === 'early' && Math.min(...mine) !== first) warns.push('Tiene la marca «Temprano» y su grupo no juega en el primer bloque.');
+    return { ok: true, group: g.id, warns };
+  };
+
   /* podio y clasificados a la gran final */
   E.podium = function (st, cat, stage) {
     stage = stage || 'J2';
@@ -1021,6 +1051,17 @@ const stg = st => E.stg(state, st);
 const zoneTag = id => { const t = tm()[id]; return t && t.zone ? ` <span class="muted small">(${esc(t.zone)})</span>` : ''; };
 const active = cat => state.teams.filter(t => !t.out && (!cat || t.cat === cat));
 function isLive(m) { return todayISO() === stageDate(m.stage) && nowMin() >= m.startMin && nowMin() < m.endMin; }
+let subPick = null;
+function subCard() {
+  const s = state.j2, cats = ['M', 'F'].filter(c => (s.groups[c] || []).length), subs = s.subs || [];
+  const rows = cats.map(c => `<h4 style="margin:12px 0 4px">${rama(c)}</h4><div class="tbl-wrap"><table><tbody>${s.groups[c].flatMap(g => g.teams.map(id => `<tr><td>${esc(nameOf(id))} <span class="muted small">${esc(E.groupName(g.id))}</span></td><td class="n">${subPick && subPick.out === id ? '' : `<button class="btn sm" data-act="subOut" data-t="${id}">Se baja</button>`}</td></tr>`)).join('')}</tbody></table></div>`).join('');
+  let pick = '';
+  if (subPick) {
+    const o = tm()[subPick.out], cand = E.j2Candidates(state, o.cat);
+    pick = `<div class="note" style="margin-top:12px"><b>Se baja ${esc(o.name)}.</b> ¿Quién la reemplaza? <div class="row" style="margin-top:8px"><select class="fld" id="subIn" style="max-width:360px">${cand.map((r, i) => `<option value="${r.id}">${esc(nameOf(r.id))} · puesto ${r.rank} de la tabla general · ${r.pos}° del ${esc(E.groupName(r.group))}${i === 0 ? ' (la mejor que no clasificó)' : ''}</option>`).join('')}</select><button class="btn gold" data-act="subOk">Confirmar reemplazo</button><button class="btn" data-act="subNo">Cancelar</button></div><p class="muted small" style="margin:8px 0 0">La pareja nueva toma el mismo grupo, bolillero y horario. No se vuelve a sortear.</p></div>`;
+  }
+  return `<div class="card"><h3>Bajas y reemplazos · jornada 2</h3><p class="muted small" style="margin:6px 0 0">Si una pareja clasificada se baja, marca «Se baja» y elige quién ocupa su lugar. Sus resultados de la jornada 1 se conservan.</p>${subs.length ? `<ul class="small" style="margin:10px 0 0">${subs.map(x => `<li><s>${esc(nameOf(x.out))}</s> → <b>${esc(nameOf(x.in))}</b> <span class="muted">(${esc(E.groupName(x.group))})</span></li>`).join('')}</ul>` : ''}${pick}<details style="margin-top:10px"><summary class="small" style="cursor:pointer">Parejas de la jornada 2</summary>${rows}</details></div>`;
+}
 function nameOf(id) { const t = tm()[id]; return t ? t.name : '—'; }
 function tlabel(id, seed) { const t = tm()[id]; if (!t) return ''; return `<span class="tl" tabindex="0" data-team="${esc(id)}" title="${esc(t.p1)} / ${esc(t.p2)}">${seed && t.seed ? '<span class="star">★</span> ' : ''}${esc(t.name)}</span>`; }
 const tc = s => String(s || '').replace(/\s+/g, ' ').trim().replace(/(^|[\s.-])(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase()).replace(/\p{Lu}+/gu, w => (w.length > 2 && String(s).trim() === String(s).trim().toUpperCase()) ? w[0] + w.slice(1).toLowerCase() : w);
@@ -1175,6 +1216,7 @@ function vSorteo(stage) {
       ${s && s.info ? Object.entries(s.info).map(([cat, i]) => i.rematch ? noteBox('', `${rama(cat)}: no fue posible evitar que se repitan cruces de la jornada 1 en algún grupo.`) : '').join('') : ''}
       ${canEdit ? `<label class="row adm" style="margin-top:10px"><input type="checkbox" data-set="avoidRematch" ${S.avoidRematch ? 'checked' : ''}> Evitar que parejas del mismo grupo de la jornada 1 vuelvan a coincidir (si es posible)</label>` : ''}</div>`;
   }
+  if (stage === 'J2' && s && canEdit) top += subCard();
   if (!s) return top;
   const rv = reveal && reveal.stage === stage ? reveal : null;
   const cats = ['M', 'F'].filter(c => (s.groups[c] || []).length);
@@ -1568,6 +1610,9 @@ document.addEventListener('click', async ev => {
   else if (a === 'tb') { state.tb[b.dataset.t] = (state.tb[b.dataset.t] || 0) + 1; save(true); render(); }
   else if (a === 'out') { const t = tm()[b.dataset.t]; if (state.j1 && !t.out) { toast('Con sorteo hecho, retirar una pareja requiere rehacer el sorteo'); } t.out = !t.out; save(); render(); }
   else if (a === 'addTeam') { const n = state.teams.length + 1000; state.teams.push({ id: 'm' + Date.now(), name: 'Nueva pareja', p1: 'Jugador 1', p2: 'Jugador 2', cat: filt.rama === 'F' ? 'F' : 'M', zone: 'Centro', seed: 0 }); save(); render(); }
+  else if (a === 'subOut') { subPick = { out: b.dataset.t }; render(); }
+  else if (a === 'subNo') { subPick = null; render(); }
+  else if (a === 'subOk') { const sel = document.getElementById('subIn'); if (!sel || !sel.value || !subPick) return; const r = E.replaceJ2(state, subPick.out, sel.value); if (r.error) { toast(r.error); return; } subPick = null; save(); render(); toast('Reemplazo hecho en el ' + E.groupName(r.group) + (r.warns.length ? ' · Ojo: ' + r.warns.join(' ') : '')); }
   else if (a === 'finOut') { const f = state.fin[b.dataset.cat]; if (!f.out.includes(b.dataset.t)) f.out.push(b.dataset.t); save(); render(); }
   else if (a === 'finBack') { const f = state.fin[b.dataset.cat]; f.out = f.out.filter(x => x !== b.dataset.t); save(); render(); }
   else if (a === 'finRepDel') { const f = state.fin[b.dataset.cat]; f.reps = f.reps.filter(x => x !== b.dataset.t); save(); render(); }

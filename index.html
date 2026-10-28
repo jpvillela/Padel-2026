@@ -665,7 +665,7 @@ main > * { min-width: 0; max-width: 100%; }
     const groups = { M: [], F: [] }, steps = { M: [], F: [] }, info = {}, matches = [];
     [['M', S.nG2M], ['F', S.nG2F]].forEach(([cat, nG]) => {
       const q = rk[cat].qualified; if (!q.length) return;
-      const d = E.drawJ2(q, cat, nG, { seed: S.seed, avoidRematch: S.avoidRematch });
+      const d = E.drawJ2(q, cat, nG, { seed: S.seed + (S.seed2 ? '|r' + S.seed2 : ''), avoidRematch: S.avoidRematch });
       groups[cat] = d.groups; steps[cat] = d.steps; info[cat] = { buckets: d.buckets, rematch: d.rematch, attempts: d.attempts, origin: Object.fromEntries(q.map(r => [r.id, r.group])) };
       d.groups.forEach(g => matches.push(...E.groupMatches('J2', cat, g, S.dur2)));
     });
@@ -1481,6 +1481,7 @@ function ensureDraw2(force) {
   // al rehacer la jornada 2 se borran solo los resultados de J2
   Object.keys(state.results).forEach(k => { if (k.startsWith('J2-')) delete state.results[k]; });
   state.tb = {};
+  if (state.j2) state.settings.seed2 = (state.settings.seed2 || 0) + 1; // cada nuevo sorteo de la jornada 2 es distinto; la jornada 1 no cambia
   E.makeJ2(state); startReveal('J2'); save(); render();
 }
 function importFile(file) {

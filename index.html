@@ -752,7 +752,9 @@ main > * { min-width: 0; max-width: 100%; }
       const en = (entrants[cat] || []).slice(); if (en.length < 5) return;
       en.sort((a, b) => (a.rank - b.rank) || String(a.zone).localeCompare(String(b.zone)));
       let k = 0;
-      const ts = en.map(x => ({ id: x.id, seed: x.rank === 1 ? ++k : 0 }));
+      // cabezas de serie: campeón y subcampeón de la zona centro (RM, las parejas más fuertes) quedan en grupos distintos; luego los campeones de las otras zonas
+      const ts = en.map(x => ({ id: x.id, seed: (x.zone === 'Centro' && x.rank <= 2) ? x.rank : 0, z: x.zone, r: x.rank }));
+      ts.filter(x => !x.seed && x.r === 1).forEach(x => { x.seed = 2 + (++k); });
       // criterio 2025: parejas de una misma zona no deben quedar en el mismo grupo. Si una zona tiene más de dos parejas
       // (zona centro), se protege sobre todo a sus dos mejores; el resto de los cruces se minimiza pero puede ser inevitable.
       const zoneOf = Object.fromEntries(en.map(x => [x.id, x.zone])), top2 = new Set();
@@ -1203,7 +1205,7 @@ function vSorteo(stage) {
       ${s ? `<p class="small muted" style="margin-bottom:0">Semilla usada: <b>${esc(S.seed)}</b> · ${esc(shortDate(S.d1))}</p>` : ''}</div>`;
   } else if (stage === 'GF') {
     const gs = gfStatus();
-    top = `<div class="card"><div class="row sp"><div><h3>Sorteo de grupos · gran final</h3><p class="muted small" style="margin:6px 0 0">Dos grupos de 4 por rama. Los campeones de cada zona son cabezas de serie y quedan en grupos distintos; el resto se sortea al azar, las parejas de una misma zona no deben quedar en el mismo grupo (criterio de 2025). Si una zona tiene más de dos parejas, como la zona centro, se asegura separar a sus dos mejores y se minimiza el resto.</p></div>
+    top = `<div class="card"><div class="row sp"><div><h3>Sorteo de grupos · gran final</h3><p class="muted small" style="margin:6px 0 0">Dos grupos de 4 por rama. Los cabezas de serie son el campeón y el subcampeón de la zona centro (las parejas más fuertes), que quedan en grupos distintos y solo podrían cruzarse en la final si ambos ganan su grupo; luego los campeones de las otras zonas. El resto se sortea al azar y las parejas de una misma zona no deben quedar en el mismo grupo (criterio de 2025).</p></div>
       ${canEdit ? `<div class="row adm"><label class="l">Semilla del sorteo<input class="fld" id="seedgf" value="${esc(s ? s.seed : '')}" placeholder="se genera sola"></label>
       ${confirmRedo === 'GF' ? `<button class="btn gold" data-act="draw3" data-force="1">Sí, rehacer y borrar resultados</button><button class="btn" data-act="cancelRedo">Cancelar</button>` : `<button class="btn pri" data-act="draw3" ${gs.ok ? '' : 'disabled'}>${s ? 'Rehacer sorteo' : 'Realizar sorteo'}</button>`}</div>` : ''}</div>
       ${gs.msgs.map(t => noteBox('', t)).join('')}${s && s.info ? ['M', 'F'].map(c => s.info[c] && s.info[c].hard ? noteBox('', `${rama(c)}: no fue posible separar a las dos mejores parejas de una misma zona (quedaron en el mismo grupo).`) : (s.info[c] && s.info[c].soft ? `<p class="muted small" style="margin:8px 0 0">${rama(c)}: las dos mejores parejas de cada zona quedaron en grupos distintos. Quedan ${s.info[c].soft} cruce(s) entre otras parejas de una misma zona, inevitable porque la zona tiene más de dos parejas.</p>` : '')).join('') : ''}
@@ -1275,7 +1277,7 @@ function vReglas() {
     <h4 style="margin-top:12px">Cupos</h4><ul class="rules">
     <li>Se juega el <b>${esc(dlabel(S.dF).toLowerCase())}</b> y en ella se disputa la <b>Copa Fabio Iglesias</b>.</li>
     <li>Hay <b>8 cupos por rama</b>, repartidos entre las zonas en proporción a las parejas inscritas en cada una. Zona centro tiene <b>${cu.M.Centro != null ? cu.M.Centro : '—'} cupos en hombres y ${cu.F.Centro != null ? cu.F.Centro : '—'} en mujeres</b>.</li>
-    <li>Clasifican las mejores parejas de la zona centro según su posición final en la jornada 2. El campeón de la zona es cabeza de serie en la gran final.</li></ul>
+    <li>Clasifican las mejores parejas de la zona centro según su posición final en la jornada 2. El campeón y el subcampeón de la zona son cabezas de serie en la gran final.</li></ul>
     <h4 style="margin-top:14px">Cómo se juega</h4><ul class="rules">
     <li>Fase de grupos: <b>un set o ${S.durG} minutos</b>, con la misma regla de tiempo y tie break.</li>
     <li>Semifinales, final y partido por el 3er lugar: <b>a dos sets</b>. Si hay un set para cada pareja, se define con super tie break.</li></ul></div>
@@ -1349,7 +1351,7 @@ function vGFClasif() {
     return `<div class="card"><h3>Bajas y reemplazos · ${cat === 'M' ? 'hombres' : 'mujeres'}</h3><p class="muted small" style="margin:6px 0 10px">Si una pareja clasificada no puede ir a la gran final, márcala como baja y elige quién ocupa su cupo.</p>
     <div class="tbl-wrap"><table><tbody>${L.ids.map(id => `<tr><td>${esc(nameOf(id))}</td><td class="n"><button class="btn sm" data-act="finOut" data-cat="${cat}" data-t="${id}">No puede ir</button></td></tr>`).join('')}${f.out.map(id => `<tr class="out"><td><s>${esc(nameOf(id))}</s> <span class="muted small">baja</span></td><td class="n"><button class="btn sm" data-act="finBack" data-cat="${cat}" data-t="${id}">Reincorporar</button></td></tr>`).join('')}</tbody></table></div>
     ${L.ids.length < n ? `<div class="row" style="margin-top:10px"><select class="fld" data-finrep="${cat}" style="max-width:320px"><option value="">Elegir reemplazo…</option>${cand.map(id => `<option value="${id}">${esc(nameOf(id))}</option>`).join('')}</select></div>` : ''}${f.reps.length ? `<p class="small muted" style="margin-top:10px">Reemplazos: ${f.reps.map(id => `${esc(nameOf(id))} <button class="btn sm" data-act="finRepDel" data-cat="${cat}" data-t="${id}">Quitar</button>`).join(' · ')}</p>` : ''}</div>`; }).join('') : ''}
-  <p class="muted small">El campeón de la zona centro es cabeza de serie en la gran final.</p>${gfPairs()}`;
+  <p class="muted small">El campeón y el subcampeón de la zona centro son cabezas de serie en la gran final.</p>${gfPairs()}`;
 }
 
 /* ---------- gran final: parejas, sorteo, partidos, posiciones, llaves ---------- */

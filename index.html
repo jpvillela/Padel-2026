@@ -812,7 +812,7 @@ main > * { min-width: 0; max-width: 100%; }
       `Se debe terminar el juego iniciado a los ${dur} minutos. Si hay diferencia de un game, el equipo que ha sacado menos veces puede sacar para empatar y luego tie break.`,
       'Desempate en la tabla: partidos ganados, diferencia de juegos y, si persiste, super tie break.'
     ],
-    ko: dur => [`Cuartos de final, semifinales, final y 3er lugar: partidos de ${dur} minutos (reglas de sets por confirmar con la organización).`],
+    ko: dur => ['Clasifican a las llaves el 1° y 2° de cada grupo (cuartos de final en hombres, semifinales en mujeres).', `Llaves: cada partido a un set o ${dur} minutos. Si se acaba el tiempo (${dur} minutos) se termina el juego en curso. Si queda una diferencia de un game, la pareja que ha sacado menos veces saca para empatar y luego se juega tie break. Si están empatados a los ${dur} minutos, se define con tie break.`, 'Desde esta fase los horarios se ajustan según la duración real de los partidos, procurando descansos similares entre parejas.'],
     gf: () => ['Semifinales, final y 3er lugar: a dos sets. Si hay un set para cada pareja, se define con super tie break.']
   };
 
@@ -900,6 +900,14 @@ main > * { min-width: 0; max-width: 100%; }
         vals.forEach((x, i) => { const cell = row.getCell(i + 1); cell.value = x; cell.border = box; cell.alignment = { vertical: 'middle', wrapText: true, horizontal: i >= 5 ? 'center' : 'left' }; });
         row.getCell(1).font = { bold: true }; row.getCell(2).fill = fill(m.cat === 'F' ? C.lgold : C.lblue);
       });
+      /* reglas de la jornada al pie de cada cancha (las de llaves solo si la cancha tiene llaves) */
+      const hasKO = stg.matches.some(m => m.court === c && m.phase === 'ko');
+      const gr = k.stage === 'GF' ? RULES.grupos(S.durG) : k.stage === 'J2' ? RULES.grupos(S.dur2) : RULES.grupos(S.dur1);
+      const kr = k.stage === 'GF' ? RULES.gf() : k.stage === 'J2' ? RULES.ko(S.durKO) : [];
+      const rules = gr.concat(hasKO ? kr : []);
+      r += 1;
+      ws.getCell(r, 1).value = 'REGLAS'; ws.getCell(r, 1).font = { bold: true };
+      rules.forEach((t, i) => { ws.mergeCells(r + 1 + i, 1, r + 1 + i, 8); const cc = ws.getCell(r + 1 + i, 1); cc.value = '• ' + t; cc.alignment = { wrapText: true, vertical: 'top' }; ws.getRow(r + 1 + i).height = t.length > 130 ? 32 : 18; });
       setup(ws, true);
     }
   }
@@ -1205,7 +1213,7 @@ function vSorteo(stage) {
       ${s ? `<p class="small muted" style="margin-bottom:0">Semilla usada: <b>${esc(S.seed)}</b> · ${esc(shortDate(S.d1))}</p>` : ''}</div>`;
   } else if (stage === 'GF') {
     const gs = gfStatus();
-    top = `<div class="card"><div class="row sp"><div><h3>Sorteo de grupos · gran final</h3><p class="muted small" style="margin:6px 0 0">Dos grupos de 4 por rama. Los cabezas de serie son el campeón y el subcampeón de la zona centro (las parejas más fuertes), que quedan en grupos distintos y solo podrían cruzarse en la final si ambos ganan su grupo; luego los campeones de las otras zonas. El resto se sortea al azar y las parejas de una misma zona no deben quedar en el mismo grupo (criterio de 2025).</p></div>
+    top = `<div class="card"><div class="row sp"><div><h3>Sorteo de grupos · gran final</h3><p class="muted small" style="margin:6px 0 0">Dos grupos de 4 por rama. El campeón y el subcampeón de la zona centro quedan en grupos distintos, y las parejas de una misma zona no deben quedar en el mismo grupo. El resto se sortea al azar.</p></div>
       ${canEdit ? `<div class="row adm"><label class="l">Semilla del sorteo<input class="fld" id="seedgf" value="${esc(s ? s.seed : '')}" placeholder="se genera sola"></label>
       ${confirmRedo === 'GF' ? `<button class="btn gold" data-act="draw3" data-force="1">Sí, rehacer y borrar resultados</button><button class="btn" data-act="cancelRedo">Cancelar</button>` : `<button class="btn pri" data-act="draw3" ${gs.ok ? '' : 'disabled'}>${s ? 'Rehacer sorteo' : 'Realizar sorteo'}</button>`}</div>` : ''}</div>
       ${gs.msgs.map(t => noteBox('', t)).join('')}${s && s.info ? ['M', 'F'].map(c => s.info[c] && s.info[c].hard ? noteBox('', `${rama(c)}: no fue posible separar a las dos mejores parejas de una misma zona (quedaron en el mismo grupo).`) : (s.info[c] && s.info[c].soft ? `<p class="muted small" style="margin:8px 0 0">${rama(c)}: las dos mejores parejas de cada zona quedaron en grupos distintos. Quedan ${s.info[c].soft} cruce(s) entre otras parejas de una misma zona, inevitable porque la zona tiene más de dos parejas.</p>` : '')).join('') : ''}
